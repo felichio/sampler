@@ -4,7 +4,11 @@
 
 
 
-R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd): m_tcpServer{server}, m_socketfd{socketfd}
+R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd)
+    : m_tcpServer{server}
+    , m_socketfd{socketfd}
+    , m_locked{false}
+    , m_buffer_pending{true}
 {
     std::cout << "TcpConnection created with fd: " << m_socketfd << std::endl;
 }
@@ -27,17 +31,91 @@ void R::TcpConnection::start_reading_thread()
 
 void R::TcpConnection::fill_buffer()
 {
-    int numOfRead = 0;
+    int numOfRead = 0; // number of bytes read in current loop
     int sumOfRead = 0;
+    int globalSumOfRead = 0;
     std::cout << "reading " << std::endl;
-    while ((numOfRead = read(m_socketfd, m_buffer + sumOfRead, buffer_size - sumOfRead)) > 0)
+    while (!m_locked && (numOfRead = read(m_socketfd, m_buffer + sumOfRead, buffer_size - sumOfRead)) > 0)
     {
-        sumOfRead += numOfRead;
+        sumOfRead += numOfRead; // number of unflushed bytes
+        globalSumOfRead += numOfRead; // number of total bytes read
         std::cout << "numOfRead: " << numOfRead << std::endl; 
         std::cout << "sumOfRead: " << sumOfRead << std::endl; 
+        std::cout << "globalSumOfRead: " << globalSumOfRead << std::endl; 
         std::cout << "buffer: " << reinterpret_cast<void *>(m_buffer) << std::endl; 
         std::cout << "buffer ofs: " << reinterpret_cast<void *>(m_buffer + sumOfRead)<< std::endl; 
         std::cout << "available sp: " << buffer_size - sumOfRead << std::endl; 
+        
+        if (m_buffer_pending && globalSumOfRead > 2)
+        {
+            choose_buffer();
+        }
+
+        if (sumOfRead > static_cast<int>(buffer_size / 64))
+        {
+            // first time sumOfRead will equal to globalSumOfRead             
+            if (sumOfRead == globalSumOfRead)
+            {
+                flush_buffer(m_buffer + 3, m_buffer + sumOfRead);
+            }
+            else
+            {
+                flush_buffer(m_buffer, m_buffer + sumOfRead);
+            }
+            sumOfRead = 0;
+        }
+
+
     }
     std::cout << "finsihed reading" << std::endl;
+}
+
+void R::TcpConnection::flush_buffer(uint8_t *beg, uint8_t *end)
+{
+    for (uint8_t *it = beg; it != end; ++it)
+    {
+        m_Rbuffer->push_back_to_stream(*it);
+    }
+}
+
+
+void R::TcpConnection::choose_buffer()
+{
+    uint8_t end = m_buffer[0u];
+    uint8_t type = m_buffer[1u];
+    uint8_t dimension = m_buffer[2u];
+    
+    if (end == 0x00 || end == 0x01)
+    {
+        if (dimension > 0x00 && dimension < 256)
+        {
+            if (type == TYPE::INT64)
+            {
+                std::cout << "Constructing rbuffer int64_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << std::endl;
+                m_Rbuffer.reset(new Rbuffer<int64_t>(static_cast<bool>(end), dimension, r_buffer_size));
+                m_buffer_pending = false;
+            }
+            else if (type == TYPE::DOUBLE64)
+            {
+                std::cout << "Constructing rbuffer double endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << std::endl;
+                m_Rbuffer.reset(new Rbuffer<double>(static_cast<bool>(end), dimension, r_buffer_size));
+                m_buffer_pending = false;
+            }
+            else
+            {
+                m_locked = true;
+            }
+        }    
+        else
+        {
+            m_locked = true;
+        }
+    }
+    else
+    {
+        m_locked = true;
+    }
+
+
+
 }

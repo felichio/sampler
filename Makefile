@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -c -Wall
 SRC_DIR = consumer/src
 BUILD_DIR = consumer/build
-OBJECTS = $(BUILD_DIR)/Main.o $(BUILD_DIR)/TcpServer.o $(BUILD_DIR)/TcpConnection.o
+OBJECTS = $(BUILD_DIR)/Main.o $(BUILD_DIR)/TcpServer.o $(BUILD_DIR)/TcpConnection.o $(BUILD_DIR)/Rbuffer.o
 
 .PHONY: all directories clean
 
