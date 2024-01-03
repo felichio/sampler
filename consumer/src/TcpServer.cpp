@@ -1,8 +1,9 @@
-#include "TcpServer.hpp"
 #include <unistd.h>
 #include <iostream>
 #include <cstring>
 #include <exception>
+#include <memory>
+#include "TcpServer.hpp"
 
 R::TcpServer::TcpServer(uint16_t port_n): m_portnumber{port_n}
 {
@@ -50,13 +51,16 @@ R::TcpServer::TcpServer(uint16_t port_n): m_portnumber{port_n}
         }
     }
 
-    // clean getaddrinfo results
-    freeaddrinfo(m_serverinfo);
     
     std::cout << "TcpServer created with port_n: " << m_portnumber << std::endl;
     std::cout << "m_socketfd: " << m_socketfd << std::endl;
 }
 
+R::TcpServer::~TcpServer()
+{
+    freeaddrinfo(m_serverinfo);
+    close(m_socketfd);
+}
 
 void R::TcpServer::init_listen(int backlog)
 {
@@ -76,10 +80,15 @@ void R::TcpServer::init_listen(int backlog)
         char buf[INET_ADDRSTRLEN];
         inet_ntop(peer_address.ss_family, &peer_address_sockaddr->sin_addr, buf, INET_ADDRSTRLEN);
         std::string peer_address_str(buf);
-        
+
         // store peer coordinates
         save_peer_address(peer_address_str, remote_port);
         std::cout << "Accepted connection: " << "\t address: " << peer_address_str << "\t port: " << remote_port << "\t fdescriptor: " << newfd << std::endl;
+        
+        std::unique_ptr<TcpConnection> tcpConnection(new TcpConnection(*this, newfd));
+        m_tcpConnections.push_back(std::move(tcpConnection));
+
+        m_tcpConnections.back()->start_reading_thread();
     }
 }
 
