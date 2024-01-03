@@ -50,8 +50,8 @@ void R::TcpConnection::fill_buffer()
         {
             choose_buffer();
         }
-
-        if (sumOfRead > static_cast<int>(buffer_size / 64))
+        static_cast<int>(buffer_size / 64);
+        if (sumOfRead > 10)
         {
             // first time sumOfRead will equal to globalSumOfRead             
             if (sumOfRead == globalSumOfRead)
@@ -95,10 +95,10 @@ void R::TcpConnection::choose_buffer()
                 m_Rbuffer.reset(new Rbuffer<int64_t>(static_cast<bool>(end), dimension, r_buffer_size));
                 m_buffer_pending = false;
             }
-            else if (type == TYPE::DOUBLE64)
+            else if (type == TYPE::INT32)
             {
                 std::cout << "Constructing rbuffer double endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << std::endl;
-                m_Rbuffer.reset(new Rbuffer<double>(static_cast<bool>(end), dimension, r_buffer_size));
+                m_Rbuffer.reset(new Rbuffer<int32_t>(static_cast<bool>(end), dimension, r_buffer_size));
                 m_buffer_pending = false;
             }
             else

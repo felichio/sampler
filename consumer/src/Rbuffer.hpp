@@ -20,6 +20,9 @@ namespace R
             size_t m_type_size;
             std::vector<uint8_t> m_agnostic_stream;
             std::vector<uint8_t> m_agnostic_buffer;
+             
+            virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end) = 0;
+            static uint64_t stream_index;
     };
 
 
@@ -28,7 +31,8 @@ namespace R
     {
         public:
             Rbuffer(bool end, uint8_t dimension, size_t RBUFFER_SIZE);
-
+            
+            virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end);
         private:
             std::vector<T> m_stream;
             std::vector<T> m_buffer;

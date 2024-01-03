@@ -21,7 +21,7 @@ namespace R
     enum TYPE: uint8_t
     {
         INT64 = 0x00,
-        DOUBLE64 = 0x01
+        INT32 = 0x01
     };
 
     class TcpServer; // forward declaration
