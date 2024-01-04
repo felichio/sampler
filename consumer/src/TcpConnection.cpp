@@ -50,10 +50,13 @@ void R::TcpConnection::fill_buffer()
         {
             choose_buffer();
         }
-        static_cast<int>(buffer_size / 64);
-        if (sumOfRead > 10)
-        {
+        // static_cast<int>(buffer_size / 64);
+        // if (sumOfRead > 10)
+        // {
             // first time sumOfRead will equal to globalSumOfRead             
+
+        if (globalSumOfRead > 2)
+        {
             if (sumOfRead == globalSumOfRead)
             {
                 flush_buffer(m_buffer + 3, m_buffer + sumOfRead);
@@ -64,9 +67,13 @@ void R::TcpConnection::fill_buffer()
             }
             sumOfRead = 0;
         }
+        // }
 
 
     }
+    close(m_socketfd);
+    // reset fd to -1 for destructor operation 
+    m_socketfd = -1;
     std::cout << "finsihed reading" << std::endl;
 }
 
@@ -115,7 +122,4 @@ void R::TcpConnection::choose_buffer()
     {
         m_locked = true;
     }
-
-
-
 }

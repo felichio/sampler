@@ -12,6 +12,7 @@ namespace R
     {
         public:
             RbufferBase(bool endianess /* true for BE */ , uint8_t dimension, size_t type_size, size_t RBUFFER_SIZE);
+            virtual ~RbufferBase();
             void push_back_to_stream(const uint8_t value);
         protected:
             bool m_endianess;
@@ -22,7 +23,7 @@ namespace R
             std::vector<uint8_t> m_agnostic_buffer;
              
             virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end) = 0;
-            static uint64_t stream_index;
+            static uint64_t bytes_seen;
     };
 
 
@@ -33,6 +34,8 @@ namespace R
             Rbuffer(bool end, uint8_t dimension, size_t RBUFFER_SIZE);
             
             virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end);
+            void push_back_to_reservoir(T value);
+            static uint64_t stream_index;
         private:
             std::vector<T> m_stream;
             std::vector<T> m_buffer;

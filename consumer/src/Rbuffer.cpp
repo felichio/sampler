@@ -16,15 +16,21 @@ R::RbufferBase::RbufferBase(bool endianess, uint8_t dimension, size_t type_size,
     std::cout << "sizes |  " <<  m_type_size * dimension * m_rbuffer_size << std::endl; 
 }
 
-uint64_t R::RbufferBase::stream_index = 0;
+R::RbufferBase::~RbufferBase(){}
+
+// initialize static counters
+uint64_t R::RbufferBase::bytes_seen = 0;
+
+template<typename T>
+uint64_t R::Rbuffer<T>::stream_index = 0;
 
 void R::RbufferBase::push_back_to_stream(const uint8_t value)
 {
     std::cout << "got : " << static_cast<int>(value) << std::endl;
     m_agnostic_stream.push_back(value);
-    stream_index++;
+    bytes_seen++;
     
-    if (stream_index % m_type_size == 0)
+    if (bytes_seen % m_type_size == 0)
     {
         uint8_t *begin;
         uint8_t *end;
@@ -66,6 +72,27 @@ void R::Rbuffer<T>::push_back_concrete_value(uint8_t *begin, uint8_t *end)
     }
     std::cout << "pushing to rstream value: " << local << std::endl;
     m_stream.push_back(local);
+   
+    if (stream_index == 0 && m_buffer.size() > 0)
+    {
+        // flush reservoir
+    }
+
+    // check if vector (whole) value is ready
+    if (stream_index++ % m_dimension == 0)
+    {
+        // feed to Statistics
+        // check Algorithm R, X etc...
+        // feed to reservoir
+    }
+
+
+}
+
+template<typename T>
+void R::Rbuffer<T>::push_back_to_reservoir(T value)
+{
+    m_buffer.push_back(value);
 }
 
 
