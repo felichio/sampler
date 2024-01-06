@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include "Statistics.hpp"
 
 namespace R
 {
@@ -23,7 +24,7 @@ namespace R
             std::vector<uint8_t> m_agnostic_buffer;
              
             virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end) = 0;
-            static uint64_t bytes_seen;
+            uint64_t m_bytes_seen;
     };
 
 
@@ -35,14 +36,21 @@ namespace R
             
             virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end);
             void push_back_to_reservoir(T value);
-            static uint64_t stream_index;
+
+            std::vector<T>& get_stream();
+            std::vector<T>& get_buffer();
+            size_t get_stream_size();
         private:
             std::vector<T> m_stream;
             std::vector<T> m_buffer;
+            Statistics<T> m_Statistics;
+
+            uint64_t m_stream_index;
     };
 
 
 } // R
+
 
 
 #endif
