@@ -1,5 +1,6 @@
 #include "RbufferManager.hpp"
 #include <iostream>
+#include <algorithm>
 
 
 
@@ -122,6 +123,7 @@ void R::RbufferManager<T>::push_back_to_stream()
     int64_t offset = Statistics<T>::AlgorithmR(m_stream_index, m_rbuffer_size);
     if (offset > -1)
     {
+        std::cout << "pushing back to reservoir with offset " << offset * m_dimension << std::endl;
         push_back_to_reservoir(m_buffer.begin() + offset * m_dimension);
     }
 }
@@ -129,12 +131,29 @@ void R::RbufferManager<T>::push_back_to_stream()
 template<typename T>
 void R::RbufferManager<T>::push_back_to_reservoir(const typename std::vector<T>::iterator &location)
 {
-    if (location != m_buffer.end())
+    if (location != m_buffer.end()) // swap
     {
+        std::cout << "Location not end()" << std::endl;
+        m_rejected_buffer_data.first = location;
+        m_rejected_buffer_data.second.clear();
         m_rejected_buffer_data.second.insert(m_rejected_buffer_data.second.begin(), location, location + m_dimension);
+        std::cout << "rejected data: " << m_rejected_buffer_data.second[0] << std::endl;
+        std::copy(m_stream.end() - m_dimension, m_stream.end(), location);
     }
-    m_buffer.insert(location, m_stream.end() - m_dimension, m_stream.end());
-    m_rejected_buffer_data.first = location;
+    else // new addition
+    {
+        std::cout << "new addition " << std::endl;
+        m_rejected_buffer_data.first = location + m_dimension;
+        m_buffer.insert(location, m_stream.end() - m_dimension, m_stream.end());
+
+    }
+
+    std::cout << " //----------------------\\" << std::endl;
+    for (int i = 0; i < m_buffer.size(); i++)
+    {
+        std::cout << "m_buffer[" << i << "]: " << m_buffer[i] << std::endl;
+    }
+    std::cout << " //----------------------\\" << std::endl;
     m_Statistics.react_buffer();
 }
 

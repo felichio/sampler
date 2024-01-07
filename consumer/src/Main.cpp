@@ -1,7 +1,7 @@
 #include <iostream>
 #include "TcpServer.hpp"
 
-
+uint32_t RBUFFER_SIZE = 2u;
 
 int main(int argc, char *argv[])
 {

@@ -1,3 +1,5 @@
+#include <cstdlib>
+#include <ctime>
 #include "Statistics.hpp"
 
 
@@ -67,11 +69,14 @@ void R::Statistics<T>::react_buffer()
     std::vector<T> new_value;
     if (rejected.first == buffer.end())
     {
+        std::cout << "new value" << std::endl;
         new_value.insert(new_value.begin(), buffer.end() - m_dimension, buffer.end());
     }
     else
     {
+        std::cout << "swapped" << std::endl;
         new_value.insert(new_value.begin(), rejected.first, rejected.first + m_dimension);
+        // std::cout << "buffer old:---------- " << rejected.second[0] << std::endl;
 
     }
 
@@ -100,6 +105,7 @@ int64_t R::Statistics<T>::AlgorithmR(uint64_t t, size_t buffer_size)
     else
     {
         uint64_t x = 0;
+        // std::srand(std::time(nullptr));
         do
         {
             x = std::rand();
