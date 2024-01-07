@@ -6,18 +6,18 @@
 namespace R
 {
     template<typename T>
-    class Rbuffer; // forward declaration
+    class RbufferManager; // forward declaration
     template <typename T>
     class Statistics
     {
         public:
-            Statistics(Rbuffer<T>& rbuffer);
+            Statistics(RbufferManager<T>& rbufferManager);
             
             void react_stream();
 
         private:
 
-            Rbuffer<T>& m_rbuffer;
+            RbufferManager<T>& m_RbufferManager;
 
             double m_median_off_cur;
             double m_median_off_pre;
@@ -36,5 +36,5 @@ namespace R
 
 
 } // R
-#include "Rbuffer.hpp"
+#include "RbufferManager.hpp"
 #endif

@@ -4,7 +4,7 @@
 
 #include <thread>
 #include "TcpServer.hpp"
-#include "Rbuffer.hpp"
+#include "RbufferManager.hpp"
 
 
 namespace R
@@ -38,7 +38,7 @@ namespace R
             TcpServer& m_tcpServer; 
             uint8_t m_buffer[buffer_size];
             int m_socketfd;
-            std::unique_ptr<RbufferBase> m_Rbuffer;
+            std::unique_ptr<RbufferManagerBase> m_RbufferManager;
             bool m_locked;
             bool m_buffer_pending;
     };

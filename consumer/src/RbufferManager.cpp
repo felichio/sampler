@@ -1,9 +1,9 @@
-#include "Rbuffer.hpp"
+#include "RbufferManager.hpp"
 #include <iostream>
 
 
 
-R::RbufferBase::RbufferBase(bool endianess, uint8_t dimension, size_t type_size, size_t RBUFFER_SIZE)
+R::RbufferManagerBase::RbufferManagerBase(bool endianess, uint8_t dimension, size_t type_size, size_t RBUFFER_SIZE)
     : m_endianess{endianess}
     , m_dimension{dimension}
     , m_rbuffer_size{RBUFFER_SIZE}
@@ -17,10 +17,10 @@ R::RbufferBase::RbufferBase(bool endianess, uint8_t dimension, size_t type_size,
     std::cout << "sizes |  " <<  m_type_size * dimension * m_rbuffer_size << std::endl; 
 }
 
-R::RbufferBase::~RbufferBase(){}
+R::RbufferManagerBase::~RbufferManagerBase(){}
 
 
-void R::RbufferBase::push_back_to_stream(const uint8_t value)
+void R::RbufferManagerBase::push_back_to_stream(const uint8_t value)
 {
     m_agnostic_stream.push_back(value);
     m_bytes_seen++;
@@ -49,8 +49,8 @@ void R::RbufferBase::push_back_to_stream(const uint8_t value)
 
 
 template<typename T>
-R::Rbuffer<T>::Rbuffer(bool end, uint8_t dimension, size_t RBUFFER_SIZE)
-    : RbufferBase(end, dimension, sizeof (T), RBUFFER_SIZE)
+R::RbufferManager<T>::RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE)
+    : RbufferManagerBase(end, dimension, sizeof (T), RBUFFER_SIZE)
     , m_Statistics{*this}
     , m_stream_index{}
 {
@@ -61,7 +61,7 @@ R::Rbuffer<T>::Rbuffer(bool end, uint8_t dimension, size_t RBUFFER_SIZE)
 }
 
 template<typename T>
-void R::Rbuffer<T>::push_back_concrete_value(uint8_t *begin, uint8_t *end)
+void R::RbufferManager<T>::push_back_concrete_value(uint8_t *begin, uint8_t *end)
 {
     T local{};
     for (uint8_t index = 0, *it = begin; it != end; ++index)
@@ -88,30 +88,30 @@ void R::Rbuffer<T>::push_back_concrete_value(uint8_t *begin, uint8_t *end)
 }
 
 template <typename T>
-size_t R::Rbuffer<T>::get_stream_size()
+size_t R::RbufferManager<T>::get_stream_size()
 {
     return m_stream.size();
 }
 
 template <typename T>
-std::vector<T>& R::Rbuffer<T>::get_stream()
+std::vector<T>& R::RbufferManager<T>::get_stream()
 {
     return m_stream;
 }
 
 template <typename T>
-std::vector<T>& R::Rbuffer<T>::get_buffer()
+std::vector<T>& R::RbufferManager<T>::get_buffer()
 {
     return m_buffer;
 }
 
 template<typename T>
-void R::Rbuffer<T>::push_back_to_reservoir(T value)
+void R::RbufferManager<T>::push_back_to_reservoir(T value)
 {
     m_buffer.push_back(value);
 }
 
 
 // explicit template instantiation for two cases
-template class R::Rbuffer<int64_t>;
-template class R::Rbuffer<int32_t>;
+template class R::RbufferManager<int64_t>;
+template class R::RbufferManager<int32_t>;

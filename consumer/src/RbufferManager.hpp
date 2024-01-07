@@ -1,6 +1,5 @@
-#ifndef _R_BUFFER_HPP
-
-#define _R_BUFFER_HPP
+#ifndef _R_BUFFER_MANAGER_HPP
+#define _R_BUFFER_MANAGER_HPP
 
 #include <cstdint>
 #include <vector>
@@ -9,11 +8,11 @@
 
 namespace R
 {
-    class RbufferBase
+    class RbufferManagerBase
     {
         public:
-            RbufferBase(bool endianess /* true for BE */ , uint8_t dimension, size_t type_size, size_t RBUFFER_SIZE);
-            virtual ~RbufferBase();
+            RbufferManagerBase(bool endianess /* true for BE */ , uint8_t dimension, size_t type_size, size_t RBUFFER_SIZE);
+            virtual ~RbufferManagerBase();
             void push_back_to_stream(const uint8_t value);
         protected:
             bool m_endianess;
@@ -29,10 +28,10 @@ namespace R
 
 
     template<typename T>
-    class Rbuffer : public RbufferBase
+    class RbufferManager : public RbufferManagerBase
     {
         public:
-            Rbuffer(bool end, uint8_t dimension, size_t RBUFFER_SIZE);
+            RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE);
             
             virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end);
             void push_back_to_reservoir(T value);

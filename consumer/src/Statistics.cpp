@@ -3,8 +3,8 @@
 
 
 template <typename T>
-R::Statistics<T>::Statistics(Rbuffer<T>& rbuffer)
-    : m_rbuffer{rbuffer}
+R::Statistics<T>::Statistics(RbufferManager<T>& rbufferManager)
+    : m_RbufferManager{rbufferManager}
     , m_median_off_cur{0.0}
     , m_median_off_pre{0.0}
     , m_median_on_cur{0.0}
@@ -30,8 +30,8 @@ template <typename T>
 void R::Statistics<T>::recalculate_median()
 {
     std::cout << "calculating new median" << std::endl;
-    double n = m_rbuffer.get_stream_size();
-    std::vector<T> stream = m_rbuffer.get_stream();
+    double n = m_RbufferManager.get_stream_size();
+    std::vector<T> stream = m_RbufferManager.get_stream();
     std::cout << "n: " << n << std::endl;
     m_median_on_cur = ((n - 1) / n) * m_median_on_pre + (1 / n) * stream.back();
     m_median_on_pre = m_median_on_cur;

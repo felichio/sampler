@@ -81,7 +81,7 @@ void R::TcpConnection::flush_buffer(uint8_t *beg, uint8_t *end)
 {
     for (uint8_t *it = beg; it != end; ++it)
     {
-        m_Rbuffer->push_back_to_stream(*it);
+        m_RbufferManager->push_back_to_stream(*it);
     }
 }
 
@@ -99,13 +99,13 @@ void R::TcpConnection::choose_buffer()
             if (type == TYPE::INT64)
             {
                 std::cout << "Constructing rbuffer type: int64_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << std::endl;
-                m_Rbuffer.reset(new Rbuffer<int64_t>(static_cast<bool>(end), dimension, r_buffer_size));
+                m_RbufferManager.reset(new RbufferManager<int64_t>(static_cast<bool>(end), dimension, r_buffer_size));
                 m_buffer_pending = false;
             }
             else if (type == TYPE::INT32)
             {
                 std::cout << "Constructing rbuffer type: int32_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << std::endl;
-                m_Rbuffer.reset(new Rbuffer<int32_t>(static_cast<bool>(end), dimension, r_buffer_size));
+                m_RbufferManager.reset(new RbufferManager<int32_t>(static_cast<bool>(end), dimension, r_buffer_size));
                 m_buffer_pending = false;
             }
             else
