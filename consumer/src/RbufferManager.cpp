@@ -157,6 +157,12 @@ void R::RbufferManager<T>::push_back_to_reservoir(const typename std::vector<T>:
     m_Statistics.react_buffer();
 }
 
+template<typename T>
+void R::RbufferManager<T>::flush_buffer()
+{
+    std::cout << "buffer flushed" << std::endl;
+}
+
 
 // explicit template instantiation for two cases
 template class R::RbufferManager<int64_t>;

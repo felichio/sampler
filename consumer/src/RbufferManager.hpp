@@ -14,6 +14,7 @@ namespace R
             RbufferManagerBase(bool endianess /* true for BE */ , uint8_t dimension, size_t type_size, size_t RBUFFER_SIZE);
             virtual ~RbufferManagerBase();
             void push_back_to_stream(const uint8_t value);
+            virtual void flush_buffer() = 0;
         protected:
             bool m_endianess;
             uint8_t m_dimension;
@@ -36,7 +37,7 @@ namespace R
             virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end);
             void push_back_to_stream();
             void push_back_to_reservoir(const typename std::vector<T>::iterator &location);
-
+            virtual void flush_buffer();
             std::vector<T>& get_stream();
             std::vector<T>& get_buffer();
             std::pair<typename std::vector<T>::iterator, std::vector<T>>& get_rejected_buffer_data();

@@ -75,6 +75,7 @@ void R::TcpConnection::fill_buffer()
     // reset fd to -1 for destructor operation 
     m_socketfd = -1;
     std::cout << "finsihed reading" << std::endl;
+    m_RbufferManager->flush_buffer();
 }
 
 void R::TcpConnection::flush_buffer(uint8_t *beg, uint8_t *end)
