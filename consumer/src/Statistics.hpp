@@ -33,7 +33,7 @@ namespace R
 
             void recalculate_stream_median(std::vector<T> new_value, double n);
             void recalculate_stream_pvariance(std::vector<T> new_value, double n);
-            void recalculate_buffer_median(std::vector<T> new_value, double n);
+            void recalculate_buffer_median(std::vector<T> old_value, std::vector<T> new_value, double n);
             void recalculate_buffer_pvariance(std::vector<T> new_value, double n);
 
 

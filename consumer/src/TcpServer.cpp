@@ -3,6 +3,7 @@
 #include <cstring>
 #include <exception>
 #include <memory>
+#include "Debug.hpp"
 #include "TcpServer.hpp"
 
 R::TcpServer::TcpServer(uint16_t port_n): m_portnumber{port_n}

@@ -1,4 +1,5 @@
 #include "RbufferManager.hpp"
+#include "Debug.hpp"
 #include <iostream>
 #include <algorithm>
 
@@ -25,7 +26,8 @@ void R::RbufferManagerBase::push_back_to_stream(const uint8_t value)
 {
     m_agnostic_stream.push_back(value);
     m_bytes_seen++;
-    std::cout << "byte no. " << m_bytes_seen << std::hex << " 0x" << static_cast<uint32_t>(value) << std::dec << std::endl;
+    debug_print(std::hex << "0x" << static_cast<uint32_t>(value) << std::dec);
+    // std::cout << "byte no. " << m_bytes_seen << std::hex << " 0x" << static_cast<uint32_t>(value) << std::dec << std::endl;
     
     if (m_bytes_seen % m_type_size == 0)
     {
@@ -41,7 +43,6 @@ void R::RbufferManagerBase::push_back_to_stream(const uint8_t value)
             end = &*m_agnostic_stream.end();
             begin = end - m_type_size;
         }
-        std::cout << static_cast<void*>(begin) << std::endl;
         push_back_concrete_value(begin, end);
     }
 
@@ -71,7 +72,8 @@ void R::RbufferManager<T>::push_back_concrete_value(uint8_t *begin, uint8_t *end
         local |= static_cast<T>(*it) << index * 8;
         m_endianess ? --it : ++it;
     }
-    std::cout << "pushing to local stream buffer, value: " << local << std::endl;
+    debug_print("local stream storing value: " << local);
+    //std::cout << "pushing to local stream buffer, value: " << local << std::endl;
     m_local_stream_buffer.push_back(local);
      
     // m_stream_index holds the size of seen stream values (dimension is NOT considered) 
@@ -112,7 +114,7 @@ std::pair<typename std::vector<T>::iterator, std::vector<T>>& R::RbufferManager<
 template<typename T>
 void R::RbufferManager<T>::push_back_to_stream()
 {
-    std::cout << "pushing dimensional value to stream" << std::endl;
+    // std::cout << "pushing dimensional value to stream" << std::endl;
     m_stream.insert(m_stream.end(), m_local_stream_buffer.begin(), m_local_stream_buffer.end());
     m_stream_index++;
     // feed to Statistics
@@ -133,11 +135,16 @@ void R::RbufferManager<T>::push_back_to_reservoir(const typename std::vector<T>:
 {
     if (location != m_buffer.end()) // swap
     {
-        std::cout << "Location not end()" << std::endl;
+        // std::cout << "Location not end()" << std::endl;
         m_rejected_buffer_data.first = location;
         m_rejected_buffer_data.second.clear();
         m_rejected_buffer_data.second.insert(m_rejected_buffer_data.second.begin(), location, location + m_dimension);
-        std::cout << "rejected data: " << m_rejected_buffer_data.second[0] << std::endl;
+        std::cout << "rejected data: ";
+        for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
+        {
+            std::cout << m_rejected_buffer_data.second[dimension] << " ";
+        }
+        std::cout << std::endl;
         std::copy(m_stream.end() - m_dimension, m_stream.end(), location);
     }
     else // new addition
@@ -149,7 +156,7 @@ void R::RbufferManager<T>::push_back_to_reservoir(const typename std::vector<T>:
     }
 
     std::cout << " //----------------------\\" << std::endl;
-    for (int i = 0; i < m_buffer.size(); i++)
+    for (uint32_t i = 0; i < m_buffer.size(); i++)
     {
         std::cout << "m_buffer[" << i << "]: " << m_buffer[i] << std::endl;
     }

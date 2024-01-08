@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unistd.h>
+#include "Debug.hpp"
 #include "TcpConnection.hpp"
 
 
@@ -34,7 +35,6 @@ void R::TcpConnection::fill_buffer()
     int numOfRead = 0; // number of bytes read in current loop
     int sumOfRead = 0;
     int globalSumOfRead = 0;
-    std::cout << "reading " << std::endl;
     while (!m_locked && (numOfRead = read(m_socketfd, m_buffer + sumOfRead, buffer_size - sumOfRead)) > 0)
     {
         sumOfRead += numOfRead; // number of unflushed bytes

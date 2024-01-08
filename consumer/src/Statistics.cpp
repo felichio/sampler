@@ -29,6 +29,12 @@ void R::Statistics<T>::react_stream()
     double n = m_RbufferManager.get_stream_size();
     std::vector<T> &stream = m_RbufferManager.get_stream();
     std::vector<T> new_value(stream.end() - m_dimension, stream.end());
+    std::cout << "stream values: ";
+    for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
+    {
+        std::cout << new_value[dimension] << " ";
+    }
+    std::cout << std::endl;
     recalculate_stream_median(new_value, n);
     recalculate_stream_pvariance(new_value, n);
 }
@@ -42,9 +48,9 @@ void R::Statistics<T>::recalculate_stream_median(std::vector<T> new_value, doubl
     for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
     {
         std::cout << std::endl;
-        std::cout << "dimension: " << static_cast<int>(dimension) << std::endl;
+        // std::cout << "dimension: " << static_cast<int>(dimension) << std::endl;
         m_median_on_cur[dimension] = ((n - 1) / n) * m_median_on_pre[dimension] + (1 / n) * new_value[dimension];
-        std::cout << "stream last:------------ " << new_value[dimension] << std::endl;
+        // std::cout << "stream last:------------ " << new_value[dimension] << std::endl;
         std::cout << "current median:---------   " << m_median_on_cur[dimension] << std::endl;
         std::cout << "previous median:---------   " << m_median_on_pre[dimension]<< std::endl;
         m_median_on_pre[dimension] = m_median_on_cur[dimension];
@@ -71,27 +77,41 @@ void R::Statistics<T>::react_buffer()
     {
         std::cout << "new value" << std::endl;
         new_value.insert(new_value.begin(), buffer.end() - m_dimension, buffer.end());
+        // take the median of stream
+        m_median_off_cur = m_median_on_cur;
+        m_median_off_pre = m_median_off_cur;
     }
     else
     {
         std::cout << "swapped" << std::endl;
         new_value.insert(new_value.begin(), rejected.first, rejected.first + m_dimension);
-        // std::cout << "buffer old:---------- " << rejected.second[0] << std::endl;
 
+        recalculate_buffer_median(rejected.second, new_value, buffer.size() / m_dimension);
     }
 
-    
+    std::cout << "buffer inserted: ";
     for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
     {
-        std::cout << "dimension: " << static_cast<int>(dimension) << std::endl;
-        std::cout << "buffer last:---------- " << new_value[dimension] << std::endl;
+        std::cout << new_value[dimension] << " ";
+        // std::cout << "dimension: " << static_cast<int>(dimension) << std::endl;
+        // std::cout << "buffer last:---------- " << new_value[dimension] << std::endl;
     }
+    std::cout << std::endl;
 }
 
 template<typename T>
-void R::Statistics<T>::recalculate_buffer_median(std::vector<T> new_value, double n)
+void R::Statistics<T>::recalculate_buffer_median(std::vector<T> old_value, std::vector<T> new_value, double n)
 {
-
+    for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
+    {
+        std::cout << "Previous buffer median: " << m_median_off_pre[dimension] << std::endl;
+        m_median_off_cur[dimension] = m_median_off_pre[dimension] + (new_value[dimension] - old_value[dimension]) / n;
+        std::cout << "old value: " << old_value[dimension] << std::endl;
+        std::cout << "new value: " << new_value[dimension] << std::endl;
+        std::cout << "Buffer median on dimension: " << static_cast<uint32_t>(dimension) << "   " << m_median_off_cur[dimension] << std::endl;
+    }
+    m_median_off_pre = m_median_off_cur;
+    
 }
 
 template<typename T>

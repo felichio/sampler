@@ -13,7 +13,7 @@ directories:
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) $(CFLAGS) $< -o $@ 
+	$(CC) $(CFLAGS) -DDEBUG=$(DEBUG) $< -o $@ 
 
 clean:
 	rm -rf $(BUILD_DIR)
