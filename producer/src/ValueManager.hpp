@@ -22,6 +22,7 @@ namespace R
             std::ifstream m_ifstream;
             std::vector<uint8_t> m_valuebuffer;  
             bool m_endianess;
+            uint8_t m_dimension;
             bool m_headcsv;
     };
 

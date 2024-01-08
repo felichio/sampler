@@ -6,7 +6,7 @@
 int main()
 {
     R::TcpClient client("192.168.1.30", 8080);
-    R::ValueManager manager(client, "../../input/1.csv");
+    R::ValueManager manager(client, "../../input/4.csv");
     manager.start_streaming();
     return 0;
 }

@@ -8,11 +8,24 @@ R::ValueManager::ValueManager(TcpClient &tcpclient, std::string filename)
     , m_filename{filename}
     , m_ifstream{m_filename, std::ios::in}
     , m_endianess{false}
+    , m_dimension{0x01}
     , m_headcsv{true}
 {
     if (m_ifstream.is_open())
     {
         std::cout << "input file opened successfully: " << m_filename << std::endl;
+        std::string line;
+        getline(m_ifstream, line);
+        std::cout << line << std::endl;
+        size_t pre = 0;
+        size_t pos = std::string::npos;
+        while ((pos = line.find(',', pre)) != std::string::npos)
+        {
+            m_dimension++;
+            pre = pos + 1;
+        }
+        m_ifstream.seekg(0);
+        std::cout << "dimension: " << static_cast<int32_t>(m_dimension) << std::endl;
     }
 }
 
@@ -24,7 +37,8 @@ void R::ValueManager::start_streaming()
     uint8_t init_buffer[3];
     init_buffer[0] = m_endianess ? R::ENDIANESS::BE : R::ENDIANESS::LE;
     init_buffer[1] = R::TYPE::INT32;
-    init_buffer[2] = 0x01; // dimension
+    init_buffer[2] = m_dimension;
+    std::cout << static_cast<uint32_t>(init_buffer[2]) << std::endl;
 
     std::vector<int32_t> lestore {41451, 8418414, -591941, 41999191, 33, 44, 19, 13};
     m_valuebuffer.insert(m_valuebuffer.end(), init_buffer, init_buffer + 3);
@@ -54,7 +68,14 @@ void R::ValueManager::read_chunk_from_file(std::vector<int32_t> &store)
     while (current_read_size < chunk_size && getline(m_ifstream, line) )
     {
         std::cout << line << std::endl;
-        store.push_back(std::stoi(line));
+        size_t pos = std::string::npos;
+        size_t pre = 0;
+        while((pos = line.find(',', pre)) != std::string::npos)
+        {
+            store.push_back(std::stoi(line.substr(pre, pos - pre)));
+            pre = pos + 1;
+        }
+        store.push_back(std::stoi(line.substr(pre, pos)));
         current_read_size++;
     }
 }
