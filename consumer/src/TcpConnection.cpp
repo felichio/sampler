@@ -4,17 +4,17 @@
 #include "TcpConnection.hpp"
 
 
-uint32_t R::TcpConnection::file_counter = 1;
 
-R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd)
+R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd, uint32_t connection_id)
     : m_tcpServer{server}
     , m_socketfd{socketfd}
     , m_locked{false}
     , m_buffer_pending{true}
     , m_file{}
+    , m_connectionid{connection_id}
 {
-    std::cout << "TcpConnection created with fd: " << m_socketfd << std::endl;
-    std::string filename = std::to_string(file_counter);
+    std::cout << "TcpConnection created with fd: " << m_socketfd << " connectionid: " << m_connectionid << std::endl;
+    std::string filename = std::to_string(m_connectionid);
     filename += ".txt";
     m_file.open(filename, std::ios::out);
     if (m_file.is_open())
@@ -24,7 +24,8 @@ R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd)
 
 R::TcpConnection::~TcpConnection()
 {
-    std::cout << "TcpConnection destroyed" << " fd: " << m_socketfd << std::endl;
+    std::cout << "TcpConnection destroyed" << " connectionid: " << m_connectionid << std::endl;
+    m_file.close();
     close(m_socketfd);
 }
 
@@ -46,12 +47,12 @@ void R::TcpConnection::fill_buffer()
     {
         sumOfRead += numOfRead; // number of unflushed bytes
         globalSumOfRead += numOfRead; // number of total bytes read
-        std::cout << "numOfRead: " << numOfRead << std::endl; 
-        std::cout << "sumOfRead: " << sumOfRead << std::endl; 
-        std::cout << "globalSumOfRead: " << globalSumOfRead << std::endl; 
-        std::cout << "buffer: " << reinterpret_cast<void *>(m_buffer) << std::endl; 
-        std::cout << "buffer ofs: " << reinterpret_cast<void *>(m_buffer + sumOfRead)<< std::endl; 
-        std::cout << "available sp: " << buffer_size - sumOfRead << std::endl; 
+        debug_print("numOfRead: " << numOfRead << std::endl);
+        debug_print("sumOfRead: " << sumOfRead << std::endl);
+        debug_print("globalSumOfRead: " << globalSumOfRead << std::endl);
+        debug_print("buffer: " << reinterpret_cast<void *>(m_buffer) << std::endl);
+        debug_print("buffer ofs: " << reinterpret_cast<void *>(m_buffer + sumOfRead)<< std::endl);
+        debug_print("available sp: " << buffer_size - sumOfRead << std::endl);
         
         if (m_buffer_pending && globalSumOfRead > 2)
         {
@@ -78,9 +79,10 @@ void R::TcpConnection::fill_buffer()
 
 
     }
-    close(m_socketfd);
+    // close(m_socketfd);
     // reset fd to -1 for destructor operation 
-    m_socketfd = -1;
+    // m_socketfd = -1;
+    m_tcpServer.remove_peer_address(m_connectionid);
     std::cout << "finsihed reading" << std::endl;
     if (m_RbufferManager)
         m_RbufferManager->flush_buffer();

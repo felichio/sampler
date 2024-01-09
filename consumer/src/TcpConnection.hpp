@@ -28,7 +28,7 @@ namespace R
     class TcpConnection
     {
         public:
-            TcpConnection(TcpServer &server, int socketfd); 
+            TcpConnection(TcpServer &server, int socketfd, uint32_t connection_id); 
             ~TcpConnection();
             void start_reading_thread();
         private:
@@ -42,8 +42,7 @@ namespace R
             bool m_locked;
             bool m_buffer_pending;
             std::ofstream m_file;
-
-            static uint32_t file_counter;
+            uint32_t m_connectionid;
     };
 }
 

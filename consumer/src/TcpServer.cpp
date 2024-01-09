@@ -6,6 +6,8 @@
 #include "Debug.hpp"
 #include "TcpServer.hpp"
 
+uint32_t R::TcpServer::connectionid = 0;
+
 R::TcpServer::TcpServer(uint16_t port_n): m_portnumber{port_n}
 {
     // zero out the structure
@@ -83,33 +85,39 @@ void R::TcpServer::init_listen(int backlog)
         std::string peer_address_str(buf);
 
         // store peer coordinates
-        save_peer_address(peer_address_str, remote_port);
+        save_peer_address(connectionid, peer_address_str, remote_port);
         std::cout << "Accepted connection: " << "\t address: " << peer_address_str << "\t port: " << remote_port << "\t fdescriptor: " << newfd << std::endl;
         
-        std::unique_ptr<TcpConnection> tcpConnection(new TcpConnection(*this, newfd));
-        m_tcpConnections.push_back(std::move(tcpConnection));
-
-        m_tcpConnections.back()->start_reading_thread();
+        std::unique_ptr<TcpConnection> tcpConnection(new TcpConnection(*this, newfd, connectionid));
+        // m_tcpConnections.push_back(std::move(tcpConnection));
+        m_tcpConnections[connectionid] = std::move(tcpConnection);
+        m_tcpConnections[connectionid]->start_reading_thread();
+        connectionid++;
+        cleanup();
     }
 }
 
 
-void R::TcpServer::save_peer_address(std::string &ip_address, uint16_t port)
+void R::TcpServer::save_peer_address(uint32_t id, std::string &ip_address, uint16_t port)
 {
     std::lock_guard<std::mutex> g(m_mutex);
-    m_peerAddresses.push_back(std::make_pair(ip_address, port));
+    m_peerAddresses[id] = std::make_pair(ip_address, port);
 }
 
-void R::TcpServer::remove_peer_address(std::string &ip_address, uint16_t port)
+void R::TcpServer::remove_peer_address(uint32_t id)
 {
-    for (std::vector<std::pair<std::string, uint16_t>>::iterator it = m_peerAddresses.begin(); it != m_peerAddresses.end(); ++it)
+    std::lock_guard<std::mutex> g(m_mutex);
+    m_peerAddresses.erase(id);
+}
+
+void R::TcpServer::cleanup()
+{
+    for (std::map<uint32_t, std::unique_ptr<TcpConnection>>::iterator it = m_tcpConnections.begin(); it != m_tcpConnections.end(); ++it)
     {
-        if (it->second == port && it->first == ip_address)
+        if (m_peerAddresses.find(it->first) == m_peerAddresses.end())
         {
-            std::lock_guard<std::mutex> g(m_mutex);
-            m_peerAddresses.erase(it);
-            break;
+            debug_print("Erasing: " << it->first);
+            m_tcpConnections.erase(it->first);
         }
     }
 }
-

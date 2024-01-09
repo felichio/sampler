@@ -1,5 +1,6 @@
 CC = g++
 CFLAGS = -c -Wall
+DEBUG = 0
 SRC_DIR_CONSUMER = consumer/src
 SRC_DIR_PRODUCER = producer/src
 BUILD_DIR_CONSUMER = consumer/build
