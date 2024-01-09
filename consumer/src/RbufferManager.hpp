@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <fstream>
 #include "Statistics.hpp"
 
 namespace R
@@ -32,7 +33,7 @@ namespace R
     class RbufferManager : public RbufferManagerBase
     {
         public:
-            RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE);
+            RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file);
             
             virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end);
             void push_back_to_stream();
@@ -40,14 +41,17 @@ namespace R
             virtual void flush_buffer();
             std::vector<T>& get_stream();
             std::vector<T>& get_buffer();
+            std::ofstream &get_file();
             std::pair<typename std::vector<T>::iterator, std::vector<T>>& get_rejected_buffer_data();
             uint64_t get_stream_size();
+            void print_buffer(std::ostream &os);
         private:
             std::vector<T> m_stream;
             std::vector<T> m_buffer;
             std::vector<T> m_local_stream_buffer;
             std::pair<typename std::vector<T>::iterator, std::vector<T>> m_rejected_buffer_data;
             Statistics<T> m_Statistics;
+            std::ofstream &m_file;
 
             uint64_t m_local_stream_index;
             uint64_t m_stream_index;

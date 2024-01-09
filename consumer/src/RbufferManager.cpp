@@ -51,9 +51,10 @@ void R::RbufferManagerBase::push_back_to_stream(const uint8_t value)
 
 
 template<typename T>
-R::RbufferManager<T>::RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE)
+R::RbufferManager<T>::RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file)
     : RbufferManagerBase(end, dimension, sizeof (T), RBUFFER_SIZE)
     , m_Statistics{*this, dimension}
+    , m_file{file}
     , m_local_stream_index{0}
     , m_stream_index{0}
 {
@@ -61,6 +62,12 @@ R::RbufferManager<T>::RbufferManager(bool end, uint8_t dimension, size_t RBUFFER
     m_stream.reserve(RBUFFER_SIZE * dimension);
     m_buffer.reserve(RBUFFER_SIZE * dimension);
     std::cout << "Rbuffer created" << std::endl; 
+
+    m_file << "Reservoir bf sz: " << RBUFFER_SIZE << std::endl
+        << "dimension: " << static_cast<uint32_t>(dimension) << std::endl
+        << "endianess: " << (end ? "Big" : "Little") << " endian" << std::endl;
+
+    m_file << "------------------- incoming stream -----------------" << std::endl;
 }
 
 template<typename T>
@@ -111,12 +118,19 @@ std::pair<typename std::vector<T>::iterator, std::vector<T>>& R::RbufferManager<
     return m_rejected_buffer_data;
 }
 
+template <typename T>
+std::ofstream &R::RbufferManager<T>::get_file()
+{
+    return m_file;
+}
+
 template<typename T>
 void R::RbufferManager<T>::push_back_to_stream()
 {
     // std::cout << "pushing dimensional value to stream" << std::endl;
     m_stream.insert(m_stream.end(), m_local_stream_buffer.begin(), m_local_stream_buffer.end());
     m_stream_index++;
+    m_file << "-------------- n: " << m_stream_index << " ------------------" << std::endl;
     // feed to Statistics
     m_Statistics.react_stream();
     // check Algorithm R, X etc...
@@ -126,7 +140,12 @@ void R::RbufferManager<T>::push_back_to_stream()
     if (offset > -1)
     {
         std::cout << "pushing back to reservoir with offset " << offset * m_dimension << std::endl;
+        m_file << "Algorithm R offset: " << offset << std::endl;
         push_back_to_reservoir(m_buffer.begin() + offset * m_dimension);
+    }
+    else
+    {
+        m_file << "skipping n: " << m_stream_index << std::endl;
     }
 }
 
@@ -170,6 +189,21 @@ void R::RbufferManager<T>::flush_buffer()
     std::cout << "buffer flushed" << std::endl;
 }
 
+template<typename T>
+void R::RbufferManager<T>::print_buffer(std::ostream &os)
+{
+    uint32_t dsize = m_buffer.size() / m_dimension;
+    for (uint32_t i = 0; i < dsize; i++)
+    {
+        os << "buffer[" << i << "]: ";
+        for (uint32_t j = 0; j < m_dimension; j++)
+        {
+            os << m_buffer[i * m_dimension + j] << " ";
+        }
+        os << std::endl;
+    }
+
+}
 
 // explicit template instantiation for two cases
 template class R::RbufferManager<int64_t>;

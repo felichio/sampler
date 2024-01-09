@@ -4,14 +4,21 @@
 #include "TcpConnection.hpp"
 
 
+uint32_t R::TcpConnection::file_counter = 1;
 
 R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd)
     : m_tcpServer{server}
     , m_socketfd{socketfd}
     , m_locked{false}
     , m_buffer_pending{true}
+    , m_file{}
 {
     std::cout << "TcpConnection created with fd: " << m_socketfd << std::endl;
+    std::string filename = std::to_string(file_counter);
+    filename += ".txt";
+    m_file.open(filename, std::ios::out);
+    if (m_file.is_open())
+        std::cout << "Open file at location: " << filename << std::endl;
 }
 
 
@@ -100,14 +107,14 @@ void R::TcpConnection::choose_buffer()
         {
             if (type == TYPE::INT64)
             {
-                std::cout << "Constructing rbuffer type: int64_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << std::endl;
-                m_RbufferManager.reset(new RbufferManager<int64_t>(static_cast<bool>(end), dimension, r_buffer_size));
+                std::cout << "Constructing rbuffer type: int64_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
+                m_RbufferManager.reset(new RbufferManager<int64_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file));
                 m_buffer_pending = false;
             }
             else if (type == TYPE::INT32)
             {
-                std::cout << "Constructing rbuffer type: int32_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << std::endl;
-                m_RbufferManager.reset(new RbufferManager<int32_t>(static_cast<bool>(end), dimension, r_buffer_size));
+                std::cout << "Constructing rbuffer type: int32_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
+                m_RbufferManager.reset(new RbufferManager<int32_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file));
                 m_buffer_pending = false;
             }
             else

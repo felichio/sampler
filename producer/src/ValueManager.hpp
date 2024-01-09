@@ -11,8 +11,8 @@ namespace R
     class ValueManager
     {
         public:
-            ValueManager(TcpClient& tcpclient, std::string filename);
-
+            ValueManager(TcpClient& tcpclient, std::string filename, uint8_t endianess);
+            ~ValueManager();
             void start_streaming();
             void copy_to_send_buffer(std::vector<int32_t> &values);
             void read_chunk_from_file(std::vector<int32_t> &store);
@@ -21,7 +21,7 @@ namespace R
             std::string m_filename;
             std::ifstream m_ifstream;
             std::vector<uint8_t> m_valuebuffer;  
-            bool m_endianess;
+            uint8_t m_endianess;
             uint8_t m_dimension;
             bool m_headcsv;
     };

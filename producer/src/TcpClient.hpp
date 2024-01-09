@@ -26,6 +26,7 @@ namespace R
     {
         public:
             TcpClient(std::string ip_address, uint16_t port_n);
+            ~TcpClient();
 
             void send(int valuesToWrite);
             uint8_t *get_send_buffer();

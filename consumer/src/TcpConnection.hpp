@@ -3,6 +3,7 @@
 #define _TCP_CONNECTION_HPP
 
 #include <thread>
+#include <fstream>
 #include "TcpServer.hpp"
 #include "RbufferManager.hpp"
 
@@ -10,7 +11,6 @@ extern uint32_t RBUFFER_SIZE;
 namespace R
 {
     static const uint32_t buffer_size = 8192;
-    static const uint32_t r_buffer_size = RBUFFER_SIZE;
 
     enum ENDIANESS: uint8_t
     {
@@ -41,6 +41,9 @@ namespace R
             std::unique_ptr<RbufferManagerBase> m_RbufferManager;
             bool m_locked;
             bool m_buffer_pending;
+            std::ofstream m_file;
+
+            static uint32_t file_counter;
     };
 }
 

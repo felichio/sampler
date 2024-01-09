@@ -25,7 +25,11 @@ R::TcpClient::TcpClient(std::string ip_address, uint16_t port_n)
         throw std::runtime_error("connect failed");
     }
 
-    
+}
+
+R::TcpClient::~TcpClient()
+{
+    close(m_socketfd);
 }
 
 

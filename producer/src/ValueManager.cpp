@@ -3,11 +3,11 @@
 #include <vector>
 #include "ValueManager.hpp"
 
-R::ValueManager::ValueManager(TcpClient &tcpclient, std::string filename)
+R::ValueManager::ValueManager(TcpClient &tcpclient, std::string filename, uint8_t endianess)
     : m_TcpClient{tcpclient}
     , m_filename{filename}
     , m_ifstream{m_filename, std::ios::in}
-    , m_endianess{false}
+    , m_endianess{endianess}
     , m_dimension{0x01}
     , m_headcsv{true}
 {
@@ -27,6 +27,15 @@ R::ValueManager::ValueManager(TcpClient &tcpclient, std::string filename)
         m_ifstream.seekg(0);
         std::cout << "dimension: " << static_cast<int32_t>(m_dimension) << std::endl;
     }
+    else
+    {
+        throw std::runtime_error("invalid file");
+    }
+}
+
+R::ValueManager::~ValueManager()
+{
+    m_ifstream.close();
 }
 
 
@@ -84,7 +93,7 @@ void R::ValueManager::copy_to_send_buffer(std::vector<int32_t> &values)
 {
     uint8_t *byte_index = reinterpret_cast<uint8_t*>(&values[0]);
     size_t type_size = sizeof(int32_t);
-    if (m_endianess)
+    if (m_endianess == R::ENDIANESS::BE)
     {
         for (int32_t i = 0, j = type_size - 1; j < values.size() * type_size; i += type_size, j += type_size)
         {
@@ -95,7 +104,7 @@ void R::ValueManager::copy_to_send_buffer(std::vector<int32_t> &values)
             }
         }
     }
-    else
+    else if (m_endianess == R::ENDIANESS::LE)
     {
         for (uint32_t i = 0; i < values.size() * sizeof (int32_t); i++)
         {
