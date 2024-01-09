@@ -56,7 +56,6 @@ void R::TcpConnection::fill_buffer()
         
         if (m_buffer_pending && globalSumOfRead > 2)
         {
-            std::cout << "choosing buffer" << std::endl;
             choose_buffer();
         }
         // static_cast<int>(buffer_size / 64);
@@ -68,7 +67,6 @@ void R::TcpConnection::fill_buffer()
         {
             if (sumOfRead == globalSumOfRead)
             {
-                std::cout << "flashing..." << std::endl;
                 flush_buffer(m_buffer + 3, m_buffer + sumOfRead);
             }
             else
@@ -76,7 +74,6 @@ void R::TcpConnection::fill_buffer()
                 flush_buffer(m_buffer, m_buffer + sumOfRead);
             }
             sumOfRead = 0;
-            std::cout << "retrying" << std::endl;
         }
         // }
 
@@ -106,9 +103,6 @@ void R::TcpConnection::choose_buffer()
     uint8_t end = m_buffer[0u];
     uint8_t type = m_buffer[1u];
     uint8_t dimension = m_buffer[2u];
-    std::cout << std::hex << static_cast<uint32_t>(end) << std::endl;
-    std::cout << std::hex << static_cast<uint32_t>(type) << std::endl;
-    std::cout << std::hex << static_cast<uint32_t>(dimension) << std::endl;
     if (end == 0x00 || end == 0x01)
     {
         if (dimension > 0x00 && dimension < 256)
