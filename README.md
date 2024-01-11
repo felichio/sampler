@@ -48,7 +48,16 @@ cut -d, -f1 < some.csv > first_dimension.csv
 ```
 to extract the first dimension
 
-You can then feed the exported first_dimension.csv to a consumer instance via the producer
+For more than one dimensions specify the columns
+```
+cut -d, -f1,3,5,6 < some.csv > 4dimensional.csv
+
+or
+
+cut -d, -f1-5 < some.csv > 5dimensional.csv
+
+```
+You can then feed the exported first_dimension.csv (or 4dimensional.csv, 5dimensional.csv etc) to a consumer instance via the producer
 
 ```
 ./produce -ip 127.0.0.1 -p 9090 -e LE -f first_dimension.csv
