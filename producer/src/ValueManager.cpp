@@ -95,7 +95,7 @@ void R::ValueManager::copy_to_send_buffer(std::vector<int32_t> &values)
     size_t type_size = sizeof(int32_t);
     if (m_endianess == R::ENDIANESS::BE)
     {
-        for (int32_t i = 0, j = type_size - 1; j < values.size() * type_size; i += type_size, j += type_size)
+        for (int32_t i = 0, j = type_size - 1; j < static_cast<int32_t>(values.size() * type_size); i += type_size, j += type_size)
         {
             int32_t index = j;
             while (index >= i)
