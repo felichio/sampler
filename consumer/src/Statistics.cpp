@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <ctime>
+#include "Debug.hpp"
 #include "Statistics.hpp"
 
 
@@ -30,14 +31,14 @@ void R::Statistics<T>::react_stream()
     std::vector<T> &stream = m_RbufferManager.get_stream();
     std::vector<T> new_value(stream.end() - m_dimension, stream.end());
     std::ofstream &m_file = m_RbufferManager.get_file();
-    std::cout << "stream values: ";
+    debug_print("stream values: ");
     m_file << "stream values: ";
     for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
     {
-        std::cout << new_value[dimension] << " ";
+        debug_print(new_value[dimension] << " ");
         m_file << new_value[dimension] << " ";
     }
-    std::cout << std::endl;
+    debug_print(std::endl);
     m_file << std::endl;
     recalculate_stream_median(new_value, n);
     recalculate_stream_pvariance(new_value, n);
@@ -46,7 +47,7 @@ void R::Statistics<T>::react_stream()
 template <typename T>
 void R::Statistics<T>::recalculate_stream_median(std::vector<T> new_value, double n)
 {
-    std::cout << "calculating new median" << std::endl;
+    debug_print("calculating new median" << std::endl);
     std::cout << "n: " << n << std::endl;
     // calculate median for each dimension
     std::ofstream &m_file = m_RbufferManager.get_file();
@@ -89,10 +90,7 @@ void R::Statistics<T>::react_buffer()
         m_median_off_pre = m_median_off_cur;
         m_file << "| buffer addition |" << std::endl;
         m_file << "values: ";
-        for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
-        {
-            m_file << new_value[dimension] << " ";
-        }
+        print_vector(m_file, new_value);
         m_file << std::endl;
         m_RbufferManager.print_buffer(m_file);
     }
@@ -103,29 +101,19 @@ void R::Statistics<T>::react_buffer()
 
         m_file << "| buffer swapping |" << std::endl;
         m_file << "new values: "; 
-        for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
-        {
-            m_file << new_value[dimension] << " ";
-        }
+        print_vector(m_file, new_value);
         m_file << std::endl;
         m_file << "rejected values: ";
-        for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
-        {
-            m_file << rejected.second[dimension] << " ";
-        }
+        print_vector(m_file, rejected.second);
         m_file << std::endl;
         m_RbufferManager.print_buffer(m_file);
         recalculate_buffer_median(rejected.second, new_value, buffer.size() / m_dimension);
     }
 
     std::cout << "buffer inserted: ";
-    for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
-    {
-        std::cout << new_value[dimension] << " ";
-        // std::cout << "dimension: " << static_cast<int>(dimension) << std::endl;
-        // std::cout << "buffer last:---------- " << new_value[dimension] << std::endl;
-    }
+    print_vector(std::cout, new_value);
     std::cout << std::endl;
+    std::cout << "|--------------------------------------|" << std::endl;
 }
 
 
@@ -145,6 +133,15 @@ void R::Statistics<T>::recalculate_buffer_median(std::vector<T> old_value, std::
     }
     m_median_off_pre = m_median_off_cur;
     
+}
+
+template<typename T>
+void R::Statistics<T>::print_vector(std::ostream &os, std::vector<T> &values)
+{
+    for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
+    {
+        os << values[dimension] << " ";
+    }
 }
 
 template<typename T>

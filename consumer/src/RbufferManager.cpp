@@ -158,28 +158,28 @@ void R::RbufferManager<T>::push_back_to_reservoir(const typename std::vector<T>:
         m_rejected_buffer_data.first = location;
         m_rejected_buffer_data.second.clear();
         m_rejected_buffer_data.second.insert(m_rejected_buffer_data.second.begin(), location, location + m_dimension);
-        std::cout << "rejected data: ";
+        debug_print("rejected data: ");
         for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
         {
-            std::cout << m_rejected_buffer_data.second[dimension] << " ";
+            debug_print(m_rejected_buffer_data.second[dimension] << " ");
         }
-        std::cout << std::endl;
+        debug_print(std::endl);
         std::copy(m_stream.end() - m_dimension, m_stream.end(), location);
     }
     else // new addition
     {
-        std::cout << "new addition " << std::endl;
+        debug_print("new addition " << std::endl);
         m_rejected_buffer_data.first = location + m_dimension;
         m_buffer.insert(location, m_stream.end() - m_dimension, m_stream.end());
 
     }
 
-    std::cout << " //----------------------\\" << std::endl;
+    debug_print(" //----------------------\\" << std::endl);
     for (uint32_t i = 0; i < m_buffer.size(); i++)
     {
-        std::cout << "m_buffer[" << i << "]: " << m_buffer[i] << std::endl;
+        debug_print("m_buffer[" << i << "]: " << m_buffer[i]);
     }
-    std::cout << " //----------------------\\" << std::endl;
+    debug_print(" //----------------------\\" << std::endl);
     m_Statistics.react_buffer();
 }
 
