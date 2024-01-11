@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <ctime>
+#include <iomanip>
 #include "Debug.hpp"
 #include "Statistics.hpp"
 
@@ -40,6 +41,8 @@ void R::Statistics<T>::react_stream()
     }
     debug_print(std::endl);
     m_file << std::endl;
+
+    /* --- Trigger Statistics change --- */
     recalculate_stream_median(new_value, n);
     recalculate_stream_pvariance(new_value, n);
 }
@@ -59,8 +62,8 @@ void R::Statistics<T>::recalculate_stream_median(std::vector<T> new_value, doubl
         // std::cout << "stream last:------------ " << new_value[dimension] << std::endl;
         std::cout << "current median:---------   " << m_median_on_cur[dimension] << std::endl;
         std::cout << "previous median:---------   " << m_median_on_pre[dimension]<< std::endl;
-        m_file << "curr stream median dimension " << static_cast<uint32_t>(dimension) << ": " << m_median_on_cur[dimension] << std::endl;
-        m_file << "prev stream median dimension " << static_cast<uint32_t>(dimension) << ": " << m_median_on_pre[dimension] << std::endl;
+        m_file << "curr stream median dimension " << static_cast<uint32_t>(dimension) << ": " << std::setprecision(3) << std::fixed << m_median_on_cur[dimension] << std::defaultfloat << std::endl;
+        m_file << "prev stream median dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_median_on_pre[dimension] << std::defaultfloat<< std::endl;
         m_median_on_pre[dimension] = m_median_on_cur[dimension];
         std::cout << std::endl;
     }
@@ -69,7 +72,7 @@ void R::Statistics<T>::recalculate_stream_median(std::vector<T> new_value, doubl
 template <typename T>
 void R::Statistics<T>::recalculate_stream_pvariance(std::vector<T> new_value, double n)
 {
-
+    //TODO
 }
 // --------------------------------------------------------------- // 
 
@@ -88,6 +91,13 @@ void R::Statistics<T>::react_buffer()
         // take the median of stream
         m_median_off_cur = m_median_on_cur;
         m_median_off_pre = m_median_off_cur;
+        /* ------------ */
+
+        // take the pvariance of stream
+        m_pvariance_off_cur = m_pvariance_on_cur;
+        m_pvariance_off_pre = m_pvariance_off_cur;
+        /* ------------ */
+
         m_file << "| buffer addition |" << std::endl;
         m_file << "values: ";
         print_vector(m_file, new_value);
@@ -107,13 +117,15 @@ void R::Statistics<T>::react_buffer()
         print_vector(m_file, rejected.second);
         m_file << std::endl;
         m_RbufferManager.print_buffer(m_file);
+
+        // Recalulate the buffer Statistics
         recalculate_buffer_median(rejected.second, new_value, buffer.size() / m_dimension);
+        recalculate_buffer_pvariance(rejected.second, new_value, buffer.size() / m_dimension);
     }
 
     std::cout << "buffer inserted: ";
     print_vector(std::cout, new_value);
     std::cout << std::endl;
-    std::cout << "|--------------------------------------|" << std::endl;
 }
 
 
@@ -128,11 +140,16 @@ void R::Statistics<T>::recalculate_buffer_median(std::vector<T> old_value, std::
         std::cout << "old value: " << old_value[dimension] << std::endl;
         std::cout << "new value: " << new_value[dimension] << std::endl;
         std::cout << "Buffer median on dimension: " << static_cast<uint32_t>(dimension) << "   " << m_median_off_cur[dimension] << std::endl;
-        m_file << "curr buffer median dimension " << static_cast<uint32_t>(dimension) << ": " << m_median_off_cur[dimension] << std::endl;
-        m_file << "prev buffer median dimension " << static_cast<uint32_t>(dimension) << ": " << m_median_off_pre[dimension] << std::endl;
+        m_file << "curr buffer median dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_median_off_cur[dimension] << std::defaultfloat << std::endl;
+        m_file << "prev buffer median dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_median_off_pre[dimension] << std::defaultfloat << std::endl;
     }
     m_median_off_pre = m_median_off_cur;
-    
+}
+
+template<typename T>
+void R::Statistics<T>::recalculate_buffer_pvariance(std::vector<T> old_value, std::vector<T> new_value, double n)
+{
+    //TODO
 }
 
 template<typename T>

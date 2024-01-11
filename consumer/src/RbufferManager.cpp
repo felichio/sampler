@@ -27,6 +27,7 @@ void R::RbufferManagerBase::push_back_to_stream(const uint8_t value)
     m_agnostic_stream.push_back(value);
     m_bytes_seen++;
     debug_print(std::hex << "0x" << static_cast<uint32_t>(value) << std::dec);
+    std::cout << std::hex << "0x" << static_cast<uint32_t>(value) << std::dec;
     // std::cout << "byte no. " << m_bytes_seen << std::hex << " 0x" << static_cast<uint32_t>(value) << std::dec << std::endl;
     
     if (m_bytes_seen % m_type_size == 0)
@@ -86,6 +87,7 @@ void R::RbufferManager<T>::push_back_concrete_value(uint8_t *begin, uint8_t *end
     // m_stream_index holds the size of seen stream values (dimension is NOT considered) 
 
     // check if vector (whole) value is ready
+    std::cout << std::endl;
     if (++m_local_stream_index % m_dimension == 0)
     {
         push_back_to_stream();

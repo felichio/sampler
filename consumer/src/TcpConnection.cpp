@@ -90,9 +90,9 @@ void R::TcpConnection::fill_buffer()
 
 void R::TcpConnection::flush_buffer(uint8_t *beg, uint8_t *end)
 {
+    
     for (uint8_t *it = beg; it != end; ++it)
     {
-        std::cout << std::hex << "0x" << static_cast<uint32_t>(*it) << std::endl;
         m_RbufferManager->push_back_to_stream(*it);
     }
 }

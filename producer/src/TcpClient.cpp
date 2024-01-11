@@ -9,10 +9,10 @@
 R::TcpClient::TcpClient(std::string ip_address, uint16_t port_n)
     : m_ipaddress{ip_address}
     , m_port{port_n}
+    , m_socketfd{-1}
     , m_numOfWrite{}
     , m_sumOfWrite{}
     , m_globalSumOfWrite{}
-    , m_socketfd{-1}
 {
     m_addr.sin_family = AF_INET;
     m_addr.sin_port = htons(m_port);
