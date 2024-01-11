@@ -105,25 +105,18 @@ void R::TcpConnection::choose_buffer()
     uint8_t dimension = m_buffer[2u];
     if (end == 0x00 || end == 0x01)
     {
-        if (dimension > 0x00 && dimension < 256)
+        if (type == TYPE::INT64)
         {
-            if (type == TYPE::INT64)
-            {
-                std::cout << "Constructing rbuffer type: int64_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
-                m_RbufferManager.reset(new RbufferManager<int64_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file));
-                m_buffer_pending = false;
-            }
-            else if (type == TYPE::INT32)
-            {
-                std::cout << "Constructing rbuffer type: int32_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
-                m_RbufferManager.reset(new RbufferManager<int32_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file));
-                m_buffer_pending = false;
-            }
-            else
-            {
-                m_locked = true;
-            }
-        }    
+            std::cout << "Constructing rbuffer type: int64_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
+            m_RbufferManager.reset(new RbufferManager<int64_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file));
+            m_buffer_pending = false;
+        }
+        else if (type == TYPE::INT32)
+        {
+            std::cout << "Constructing rbuffer type: int32_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
+            m_RbufferManager.reset(new RbufferManager<int32_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file));
+            m_buffer_pending = false;
+        }
         else
         {
             m_locked = true;
