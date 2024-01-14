@@ -22,18 +22,18 @@ namespace R
 
             RbufferManager<T>& m_RbufferManager;
             uint8_t m_dimension;
-            std::vector<double> m_median_off_cur;
-            std::vector<double> m_median_off_pre;
-            std::vector<double> m_median_on_cur;
-            std::vector<double> m_median_on_pre;
+            std::vector<double> m_mean_off_cur;
+            std::vector<double> m_mean_off_pre;
+            std::vector<double> m_mean_on_cur;
+            std::vector<double> m_mean_on_pre;
             std::vector<double> m_pvariance_off_cur;
             std::vector<double> m_pvariance_off_pre;
             std::vector<double> m_pvariance_on_cur;
             std::vector<double> m_pvariance_on_pre;
 
-            void recalculate_stream_median(std::vector<T> new_value, double n);
+            void recalculate_stream_mean(std::vector<T> new_value, double n);
             void recalculate_stream_pvariance(std::vector<T> new_value, double n);
-            void recalculate_buffer_median(std::vector<T> old_value, std::vector<T> new_value, double n);
+            void recalculate_buffer_mean(std::vector<T> old_value, std::vector<T> new_value, double n);
             void recalculate_buffer_pvariance(std::vector<T> old_value, std::vector<T> new_value, double n);
 
             void print_vector(std::ostream& os, std::vector<T>& values);

@@ -11,10 +11,10 @@ template <typename T>
 R::Statistics<T>::Statistics(RbufferManager<T>& rbufferManager, uint8_t dimension)
     : m_RbufferManager{rbufferManager}
     , m_dimension{dimension}
-    , m_median_off_cur(m_dimension, 0.0)
-    , m_median_off_pre(m_dimension, 0.0)
-    , m_median_on_cur(m_dimension, 0.0)
-    , m_median_on_pre(m_dimension, 0.0)
+    , m_mean_off_cur(m_dimension, 0.0)
+    , m_mean_off_pre(m_dimension, 0.0)
+    , m_mean_on_cur(m_dimension, 0.0)
+    , m_mean_on_pre(m_dimension, 0.0)
     , m_pvariance_off_cur(m_dimension, 0.0)
     , m_pvariance_off_pre(m_dimension, 0.0)
     , m_pvariance_on_cur(m_dimension, 0.0)
@@ -44,28 +44,28 @@ void R::Statistics<T>::react_stream()
     m_file << std::endl;
 
     /* --- Trigger Statistics change --- */
-    recalculate_stream_median(new_value, n);
+    recalculate_stream_mean(new_value, n);
     recalculate_stream_pvariance(new_value, n);
 }
 
 template <typename T>
-void R::Statistics<T>::recalculate_stream_median(std::vector<T> new_value, double n)
+void R::Statistics<T>::recalculate_stream_mean(std::vector<T> new_value, double n)
 {
-    debug_print("calculating new median" << std::endl);
+    debug_print("calculating new mean" << std::endl);
     std::cout << "n: " << n << std::endl;
-    // calculate median for each dimension
+    // calculate mean for each dimension
     std::ofstream &m_file = m_RbufferManager.get_file();
     for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
     {
         std::cout << std::endl;
         // std::cout << "dimension: " << static_cast<int>(dimension) << std::endl;
-        m_median_on_pre[dimension] = m_median_on_cur[dimension];
-        m_median_on_cur[dimension] = ((n - 1) / n) * m_median_on_pre[dimension] + (1 / n) * new_value[dimension];
+        m_mean_on_pre[dimension] = m_mean_on_cur[dimension];
+        m_mean_on_cur[dimension] = ((n - 1) / n) * m_mean_on_pre[dimension] + (1 / n) * new_value[dimension];
         // std::cout << "stream last:------------ " << new_value[dimension] << std::endl;
-        std::cout << "current median:---------   " << m_median_on_cur[dimension] << std::endl;
-        std::cout << "previous median:---------   " << m_median_on_pre[dimension]<< std::endl;
-        m_file << "curr stream median dimension " << static_cast<uint32_t>(dimension) << ": " << std::setprecision(3) << std::fixed << m_median_on_cur[dimension] << std::defaultfloat << std::endl;
-        m_file << "prev stream median dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_median_on_pre[dimension] << std::defaultfloat<< std::endl;
+        std::cout << "current mean:---------   " << m_mean_on_cur[dimension] << std::endl;
+        std::cout << "previous mean:---------   " << m_mean_on_pre[dimension]<< std::endl;
+        m_file << "curr stream mean dimension " << static_cast<uint32_t>(dimension) << ": " << std::setprecision(3) << std::fixed << m_mean_on_cur[dimension] << std::defaultfloat << std::endl;
+        m_file << "prev stream mean dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_mean_on_pre[dimension] << std::defaultfloat<< std::endl;
         std::cout << std::endl;
     }
 }
@@ -77,7 +77,7 @@ void R::Statistics<T>::recalculate_stream_pvariance(std::vector<T> new_value, do
     for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
     {
         m_pvariance_on_pre[dimension] = m_pvariance_on_cur[dimension];
-        m_pvariance_on_cur[dimension] = (n - 1) / n * m_pvariance_on_pre[dimension] + (n - 1) / pow(n, 2) * pow(new_value[dimension] - m_median_on_pre[dimension], 2);
+        m_pvariance_on_cur[dimension] = (n - 1) / n * m_pvariance_on_pre[dimension] + (n - 1) / pow(n, 2) * pow(new_value[dimension] - m_mean_on_pre[dimension], 2);
         std::cout << "current pvariance:---------   " << m_pvariance_on_cur[dimension] << std::endl;
         std::cout << "previous pvariance:---------   " << m_pvariance_on_pre[dimension]<< std::endl;
         m_file << "curr stream pvariance dimension " << static_cast<uint32_t>(dimension) << ": " << std::setprecision(3) << std::fixed << m_pvariance_on_cur[dimension] << std::defaultfloat << std::endl;
@@ -98,9 +98,9 @@ void R::Statistics<T>::react_buffer()
     {
         std::cout << "new value" << std::endl;
         new_value.insert(new_value.begin(), buffer.end() - m_dimension, buffer.end());
-        // take the median of stream
-        m_median_off_cur = m_median_on_cur;
-        m_median_off_pre = m_median_off_cur;
+        // take the mean of stream
+        m_mean_off_cur = m_mean_on_cur;
+        m_mean_off_pre = m_mean_off_cur;
         /* ------------ */
 
         // take the pvariance of stream
@@ -129,7 +129,7 @@ void R::Statistics<T>::react_buffer()
         m_RbufferManager.print_buffer(m_file);
 
         // Recalulate the buffer Statistics
-        recalculate_buffer_median(rejected.second, new_value, buffer.size() / m_dimension);
+        recalculate_buffer_mean(rejected.second, new_value, buffer.size() / m_dimension);
         recalculate_buffer_pvariance(rejected.second, new_value, buffer.size() / m_dimension);
     }
 
@@ -140,19 +140,19 @@ void R::Statistics<T>::react_buffer()
 
 
 template<typename T>
-void R::Statistics<T>::recalculate_buffer_median(std::vector<T> old_value, std::vector<T> new_value, double n)
+void R::Statistics<T>::recalculate_buffer_mean(std::vector<T> old_value, std::vector<T> new_value, double n)
 {
     std::ofstream &m_file = m_RbufferManager.get_file();
     for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
     {
-        std::cout << "Previous buffer median: " << m_median_off_pre[dimension] << std::endl;
-        m_median_off_pre[dimension] = m_median_off_cur[dimension];
-        m_median_off_cur[dimension] = m_median_off_pre[dimension] + (new_value[dimension] - old_value[dimension]) / n;
+        std::cout << "Previous buffer mean: " << m_mean_off_pre[dimension] << std::endl;
+        m_mean_off_pre[dimension] = m_mean_off_cur[dimension];
+        m_mean_off_cur[dimension] = m_mean_off_pre[dimension] + (new_value[dimension] - old_value[dimension]) / n;
         std::cout << "old value: " << old_value[dimension] << std::endl;
         std::cout << "new value: " << new_value[dimension] << std::endl;
-        std::cout << "Buffer median on dimension: " << static_cast<uint32_t>(dimension) << "   " << m_median_off_cur[dimension] << std::endl;
-        m_file << "curr buffer median dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_median_off_cur[dimension] << std::defaultfloat << std::endl;
-        m_file << "prev buffer median dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_median_off_pre[dimension] << std::defaultfloat << std::endl;
+        std::cout << "Buffer mean on dimension: " << static_cast<uint32_t>(dimension) << "   " << m_mean_off_cur[dimension] << std::endl;
+        m_file << "curr buffer mean dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_mean_off_cur[dimension] << std::defaultfloat << std::endl;
+        m_file << "prev buffer mean dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_mean_off_pre[dimension] << std::defaultfloat << std::endl;
     }
 }
 
@@ -163,7 +163,7 @@ void R::Statistics<T>::recalculate_buffer_pvariance(std::vector<T> old_value, st
     for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
     {
         m_pvariance_off_pre[dimension] = m_pvariance_off_cur[dimension];
-        m_pvariance_off_cur[dimension] = m_pvariance_off_pre[dimension] + (pow(new_value[dimension], 2) - pow(old_value[dimension], 2)) / n + pow(m_median_off_pre[dimension], 2) - pow(m_median_off_cur[dimension], 2);
+        m_pvariance_off_cur[dimension] = m_pvariance_off_pre[dimension] + (pow(new_value[dimension], 2) - pow(old_value[dimension], 2)) / n + pow(m_mean_off_pre[dimension], 2) - pow(m_mean_off_cur[dimension], 2);
         m_file << "curr buffer pvariance dimension " << static_cast<uint32_t>(dimension) << ": " << std::setprecision(3) << std::fixed << m_pvariance_off_cur[dimension] << std::defaultfloat << std::endl;
         m_file << "prev buffer pvariance dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_pvariance_off_pre[dimension] << std::defaultfloat<< std::endl;
     }
