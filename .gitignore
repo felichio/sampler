@@ -1,6 +1,6 @@
 **/build
 **/input
-consume
+sample
 produce
 *.txt
 .vscode
