@@ -1,6 +1,7 @@
 #ifndef __INPUT_MANAGER_HPP
 #define __INPUT_MANAGER_HPP
 #include <string>
+#include <cstdint>
 namespace R
 {
     class InputManager
