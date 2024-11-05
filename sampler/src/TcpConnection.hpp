@@ -15,7 +15,7 @@ namespace R
     enum ENDIANESS: uint8_t
     {
         LE = 0x00,
-        BE= 0x01
+        BE = 0x01
     };
 
     enum TYPE: uint8_t
