@@ -1,7 +1,8 @@
 #include <iostream>
 #include <unistd.h>
-#include "OutputStream.hpp"
 #include "Reader.hpp"
+
+
 
 
 
@@ -11,9 +12,14 @@ R::Reader::Reader(int socketfd, bool endianess, uint8_t dimension, size_t type_s
     m_dimension{dimension}, 
     m_type_size{type_size}, 
     m_bytes_seen{},
-    m_buffer_pending{false}
+    m_buffer_pending{true}
 {
     
+}
+
+R::Reader::~Reader()
+{
+    m_os->flush_to_stream(std::cout);
 }
 
 void R::Reader::read_output_stream()
@@ -45,6 +51,8 @@ void R::Reader::read_output_stream()
             sumOfRead = 0;
         }
     }
+
+
 }
 
 void R::Reader::flush_buffer(uint8_t *beg, uint8_t *end)
@@ -72,17 +80,7 @@ void R::Reader::flush_buffer(uint8_t *beg, uint8_t *end)
                 begin = end - m_type_size;
             }
             
-            if (m_type_size == TYPE::INT64)
-            {
-                OutputStream<int64_t> os(m_endianess, m_dimension);
-                os.fill_buffer(begin, end);
-            }
-            else if (m_type_size == TYPE::INT32)
-            {
-                OutputStream<int32_t> os(m_endianess, m_dimension);
-                os.fill_buffer(begin, end);
-
-            }
+            m_os->fill_buffer(begin, end);
 
         }
 
@@ -96,7 +94,15 @@ void R::Reader::get_com_attributes()
     uint8_t dimension = m_buffer[2u];
 
     m_endianess = static_cast<bool>(end);
-    m_type_size = type == TYPE::INT64 ? static_cast<size_t>(8) : static_cast<size_t>(4);
+    m_type_size = (type == TYPE::INT64) ? static_cast<size_t>(8) : static_cast<size_t>(4);
     m_dimension = dimension;
+    if (type == TYPE::INT64)
+    {
+        m_os.reset(new OutputStream<int64_t>(m_endianess, m_dimension));
+    }
+    else if (type == TYPE::INT32)
+    {
+        m_os.reset(new OutputStream<int32_t>(m_endianess, m_dimension));
+    }
     m_buffer_pending = false;
 }
