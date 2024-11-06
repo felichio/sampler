@@ -62,8 +62,7 @@ void R::Reader::flush_buffer(uint8_t *beg, uint8_t *end)
         const uint8_t value = *it;
         m_agnostic_stream.push_back(value);
         m_bytes_seen++;
-        std::cout << std::hex << "0x" << static_cast<uint32_t>(value) << std::dec;
-        std::cout << std::endl;
+        
 
         if (m_bytes_seen % m_type_size == 0)
         {

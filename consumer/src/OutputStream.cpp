@@ -32,7 +32,6 @@ void R::OutputStream<T>::fill_buffer(uint8_t *begin, uint8_t *end)
         m_endianess ? --it : ++it;
     }
     m_buffer.push_back(local);
-    std::cout << local << std::endl;
 }
 
 template<typename T>

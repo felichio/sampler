@@ -4,6 +4,7 @@
 #include <string>
 #include <mutex>
 #include <memory>
+#include "Debug.hpp"
 #include "Handler.hpp"
 #include "Reader.hpp"
 
@@ -32,7 +33,7 @@ R::Handler::Handler(uint16_t port): m_port {port}
             sockaddr_in *ipv4 = reinterpret_cast<sockaddr_in*>(p->ai_addr);
             char buf[INET_ADDRSTRLEN];
             inet_ntop(p->ai_family, &(ipv4->sin_addr), buf, INET_ADDRSTRLEN);
-            std::cout << "listening ip address: " << buf << std::endl;
+            debug_print("listening ip address: " << buf << std::endl);
 
             if ((m_socketfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
             {
@@ -63,8 +64,8 @@ void R::Handler::init()
         throw std::runtime_error("listen failed");
     }
 
-    std::cout << "Listening for incoming stream at port: " << m_port << std::endl;
-    std::cout << "m_socketfd: " << m_socketfd << std::endl;
+    debug_print("Listening for incoming stream at port: " << m_port << std::endl);
+    debug_print("m_socketfd: " << m_socketfd << std::endl);
 
     sockaddr_storage peer_address;
     socklen_t size_of_peer = sizeof(peer_address);
@@ -75,7 +76,7 @@ void R::Handler::init()
     inet_ntop(peer_address.ss_family, &peer_address_sockaddr->sin_addr, buf, INET_ADDRSTRLEN);
     std::string peer_address_str(buf);
 
-    std::cout << "Accepted connection: " << "\t address: " << peer_address_str << "\t port: " << remote_port << "\t fdescriptor: " << newfd << std::endl;
+    debug_print("Accepted connection: " << "\t address: " << peer_address_str << "\t port: " << remote_port << "\t fdescriptor: " << newfd << std::endl);
 
     R::Reader r(newfd, false, 1, sizeof (int));
     r.read_output_stream();
