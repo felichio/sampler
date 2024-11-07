@@ -1,3 +1,6 @@
+#ifndef __READER_HPP
+#define __READER_HPP
+
 #include <vector>
 #include <cstdint>
 #include <string>
@@ -42,3 +45,5 @@ namespace R
 
 
 }
+
+#endif

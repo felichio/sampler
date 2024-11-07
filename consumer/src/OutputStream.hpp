@@ -1,3 +1,6 @@
+#ifndef __OUTPUT_STREAM_HPP
+#define __OUTPUT_STREAM_HPP
+
 #include <vector>
 #include <cstdint>
 namespace R
@@ -30,3 +33,5 @@ namespace R
 
 
 }
+
+#endif

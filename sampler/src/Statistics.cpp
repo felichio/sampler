@@ -19,6 +19,8 @@ R::Statistics<T>::Statistics(RbufferManager<T>& rbufferManager, uint8_t dimensio
     , m_pvariance_off_pre(m_dimension, 0.0)
     , m_pvariance_on_cur(m_dimension, 0.0)
     , m_pvariance_on_pre(m_dimension, 0.0)
+    , m_coeffv_buffer(m_dimension, 0.0)
+    , m_coeffv_stream(m_dimension, 0.0)
     
 {
 
@@ -46,6 +48,7 @@ void R::Statistics<T>::react_stream()
     /* --- Trigger Statistics change --- */
     recalculate_stream_mean(new_value, n);
     recalculate_stream_pvariance(new_value, n);
+    recalculate_stream_coeffv();
 }
 
 template <typename T>
@@ -84,6 +87,20 @@ void R::Statistics<T>::recalculate_stream_pvariance(std::vector<T> new_value, do
         m_file << "prev stream pvariance dimension " << static_cast<uint32_t>(dimension) << ": " << std::fixed << m_pvariance_on_pre[dimension] << std::defaultfloat<< std::endl;
     }
 }
+
+template <typename T>
+void R::Statistics<T>::recalculate_stream_coeffv()
+{
+    std::ofstream &m_file = m_RbufferManager.get_file();
+    for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
+    {
+        m_coeffv_stream[dimension] = std::sqrt(m_pvariance_on_cur[dimension]) / m_mean_on_cur[dimension];
+        std::cout << "current coefficient_variation:---------   " << m_coeffv_stream[dimension] << std::endl;
+        m_file << "current coefficient_variation dimension " << static_cast<uint32_t>(dimension) << ": " << std::setprecision(3) << std::fixed << m_coeffv_stream[dimension] << std::defaultfloat << std::endl;
+    }
+}
+
+
 // --------------------------------------------------------------- // 
 
 template<typename T>
@@ -106,6 +123,10 @@ void R::Statistics<T>::react_buffer()
         // take the pvariance of stream
         m_pvariance_off_cur = m_pvariance_on_cur;
         m_pvariance_off_pre = m_pvariance_off_cur;
+        /* ------------ */
+
+        // take the coefficient of variation of stream
+        m_coeffv_buffer = m_coeffv_stream;
         /* ------------ */
 
         m_file << "| buffer addition |" << std::endl;
@@ -131,6 +152,7 @@ void R::Statistics<T>::react_buffer()
         // Recalulate the buffer Statistics
         recalculate_buffer_mean(rejected.second, new_value, buffer.size() / m_dimension);
         recalculate_buffer_pvariance(rejected.second, new_value, buffer.size() / m_dimension);
+        recalculate_buffer_coeffv();
     }
 
     std::cout << "buffer inserted: ";
@@ -169,6 +191,20 @@ void R::Statistics<T>::recalculate_buffer_pvariance(std::vector<T> old_value, st
     }
 }
 
+
+template<typename T>
+void R::Statistics<T>::recalculate_buffer_coeffv()
+{
+    std::ofstream &m_file = m_RbufferManager.get_file();
+    for (uint8_t dimension = 0; dimension < m_dimension; dimension++)
+    {
+        m_coeffv_buffer[dimension] = std::sqrt(m_pvariance_off_cur[dimension]) / m_mean_off_cur[dimension];
+        std::cout << "current buffer coefficient_variation:---------   " << m_coeffv_buffer[dimension] << std::endl;
+        m_file << "current buffer coefficient_variation dimension " << static_cast<uint32_t>(dimension) << ": " << std::setprecision(3) << std::fixed << m_coeffv_buffer[dimension] << std::defaultfloat << std::endl;
+    }
+}
+
+
 template<typename T>
 void R::Statistics<T>::print_vector(std::ostream &os, std::vector<T> &values)
 {
@@ -176,6 +212,39 @@ void R::Statistics<T>::print_vector(std::ostream &os, std::vector<T> &values)
     {
         os << values[dimension] << " ";
     }
+}
+
+
+template<typename T>
+bool R::Statistics<T>::check_condition()
+{
+    std::ofstream &m_file = m_RbufferManager.get_file();
+    // check for dimension 0
+    if (std::abs((m_coeffv_stream[0] - m_coeffv_buffer[0]) / m_coeffv_stream[0]) > 0.1)
+    {
+        std::cout << "CV condition: " << std::abs((m_coeffv_stream[0] - m_coeffv_buffer[0]) / m_coeffv_stream[0]) << std::endl;
+        m_file << "CV condition: " << std::abs((m_coeffv_stream[0] - m_coeffv_buffer[0]) / m_coeffv_stream[0]) << std::endl;
+        return true;
+    }
+    return false;
+
+}
+
+
+template<typename T>
+void R::Statistics<T>::clear_state()
+{
+    std::fill(m_mean_off_cur.begin(), m_mean_off_cur.end(), 0);
+    std::fill(m_mean_off_pre.begin(), m_mean_off_pre.end(), 0);
+    std::fill(m_mean_on_cur.begin(), m_mean_on_cur.end(), 0);
+    std::fill(m_mean_on_pre.begin(), m_mean_on_pre.end(), 0);
+    std::fill(m_pvariance_off_cur.begin(), m_pvariance_off_cur.end(), 0);
+    std::fill(m_pvariance_off_pre.begin(), m_pvariance_off_pre.end(), 0);
+    std::fill(m_pvariance_on_cur.begin(), m_pvariance_on_cur.end(), 0);
+    std::fill(m_pvariance_on_pre.begin(), m_pvariance_on_pre.end(), 0);
+    std::fill(m_coeffv_buffer.begin(), m_coeffv_buffer.end(), 0);
+    std::fill(m_coeffv_stream.begin(), m_coeffv_stream.end(), 0);
+
 }
 
 template<typename T>

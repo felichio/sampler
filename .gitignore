@@ -2,5 +2,6 @@
 **/input
 sample
 produce
+consume
 *.txt
 .vscode

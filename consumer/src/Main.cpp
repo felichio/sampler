@@ -1,10 +1,12 @@
 #include <iostream>
+#include "InputManager.hpp"
 #include "Handler.hpp"
 
 
 int main(int argc, char *argv[])
 {
-    R::Handler h(8888);
+    R::InputManager imanager(argv, argc);
+    R::Handler h(imanager.m_port);
     h.init();
     return 0;
 }

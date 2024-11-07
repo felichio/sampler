@@ -1,3 +1,6 @@
+#ifndef __HANDLER_HPP
+#define __HANDLER_HPP
+
 #include <cstdint>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -22,3 +25,5 @@ namespace R
 
 
 }
+
+#endif

@@ -16,6 +16,8 @@ namespace R
             
             void react_stream();
             void react_buffer();
+            bool check_condition();
+            void clear_state();
 
             static int64_t AlgorithmR(uint64_t t, size_t buffer_size);
         private:
@@ -31,10 +33,16 @@ namespace R
             std::vector<double> m_pvariance_on_cur;
             std::vector<double> m_pvariance_on_pre;
 
+            std::vector<double> m_coeffv_buffer;
+            std::vector<double> m_coeffv_stream;
+
             void recalculate_stream_mean(std::vector<T> new_value, double n);
             void recalculate_stream_pvariance(std::vector<T> new_value, double n);
             void recalculate_buffer_mean(std::vector<T> old_value, std::vector<T> new_value, double n);
             void recalculate_buffer_pvariance(std::vector<T> old_value, std::vector<T> new_value, double n);
+
+            void recalculate_buffer_coeffv();
+            void recalculate_stream_coeffv();
 
             void print_vector(std::ostream& os, std::vector<T>& values);
 

@@ -149,6 +149,13 @@ void R::RbufferManager<T>::push_back_to_stream()
     {
         m_file << "skipping n: " << m_stream_index << std::endl;
     }
+
+    if (m_Statistics.check_condition())
+    {
+        flush_buffer();
+        m_Statistics.clear_state();
+        m_stream_index = 0;
+    }
 }
 
 template<typename T>
@@ -189,6 +196,8 @@ template<typename T>
 void R::RbufferManager<T>::flush_buffer()
 {
     std::cout << "buffer flushed" << std::endl;
+    print_buffer(std::cout);
+    m_buffer.clear();
 }
 
 template<typename T>

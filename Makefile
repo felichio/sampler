@@ -9,7 +9,7 @@ BUILD_DIR_PRODUCER = producer/build
 BUILD_DIR_CONSUMER = consumer/build
 OBJECTS_SAMPLER = $(BUILD_DIR_SAMPLER)/Main.o $(BUILD_DIR_SAMPLER)/TcpServer.o $(BUILD_DIR_SAMPLER)/TcpConnection.o $(BUILD_DIR_SAMPLER)/RbufferManager.o $(BUILD_DIR_SAMPLER)/Statistics.o $(BUILD_DIR_SAMPLER)/InputManager.o
 OBJECTS_PRODUCER = $(BUILD_DIR_PRODUCER)/Main.o $(BUILD_DIR_PRODUCER)/TcpClient.o $(BUILD_DIR_PRODUCER)/ValueManager.o $(BUILD_DIR_PRODUCER)/InputManager.o
-OBJECTS_CONSUMER = $(BUILD_DIR_CONSUMER)/Main.o $(BUILD_DIR_CONSUMER)/Handler.o $(BUILD_DIR_CONSUMER)/Reader.o $(BUILD_DIR_CONSUMER)/OutputStream.o
+OBJECTS_CONSUMER = $(BUILD_DIR_CONSUMER)/Main.o $(BUILD_DIR_CONSUMER)/Handler.o $(BUILD_DIR_CONSUMER)/Reader.o $(BUILD_DIR_CONSUMER)/OutputStream.o $(BUILD_DIR_CONSUMER)/InputManager.o
 
 .PHONY: all directories clean sampler producer consumer clones
 
