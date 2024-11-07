@@ -4,8 +4,11 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include <memory>
 #include <fstream>
 #include "Statistics.hpp"
+#include "TcpClient.hpp"
+#include "Enum.hpp"
 
 namespace R
 {
@@ -33,7 +36,7 @@ namespace R
     class RbufferManager : public RbufferManagerBase
     {
         public:
-            RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file);
+            RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file, std::unique_ptr<TcpClient> tcp_client);
             
             virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end);
             void push_back_to_stream();
@@ -45,6 +48,7 @@ namespace R
             std::pair<typename std::vector<T>::iterator, std::vector<T>>& get_rejected_buffer_data();
             uint64_t get_stream_size();
             void print_buffer(std::ostream &os);
+            
         private:
             std::vector<T> m_stream;
             std::vector<T> m_buffer;
@@ -55,6 +59,8 @@ namespace R
 
             uint64_t m_local_stream_index;
             uint64_t m_stream_index;
+            std::unique_ptr<TcpClient> m_tcp_client;
+            
     };
 
 

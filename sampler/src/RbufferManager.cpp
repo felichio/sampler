@@ -1,6 +1,7 @@
 #include "RbufferManager.hpp"
 #include "Debug.hpp"
 #include <iostream>
+#include <cstring>
 #include <algorithm>
 
 
@@ -52,12 +53,13 @@ void R::RbufferManagerBase::push_back_to_stream(const uint8_t value)
 
 
 template<typename T>
-R::RbufferManager<T>::RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file)
+R::RbufferManager<T>::RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file, std::unique_ptr<TcpClient> tcp_client)
     : RbufferManagerBase(end, dimension, sizeof (T), RBUFFER_SIZE)
     , m_Statistics{*this, dimension}
     , m_file{file}
     , m_local_stream_index{0}
     , m_stream_index{0}
+    , m_tcp_client{std::move(tcp_client)}
 {
     // reserve for at least reservoir buffer size
     m_stream.reserve(RBUFFER_SIZE * dimension);
@@ -69,6 +71,13 @@ R::RbufferManager<T>::RbufferManager(bool end, uint8_t dimension, size_t RBUFFER
         << "endianess: " << (end ? "Big" : "Little") << " endian" << std::endl;
 
     m_file << "------------------- incoming stream -----------------" << std::endl;
+
+
+    // send first 3 protocol bytes
+    if (m_tcp_client)
+    {
+        m_tcp_client->send(3);
+    }
 }
 
 template<typename T>
@@ -197,6 +206,34 @@ void R::RbufferManager<T>::flush_buffer()
 {
     std::cout << "buffer flushed" << std::endl;
     print_buffer(std::cout);
+    std::vector<uint8_t> value_buffer;
+    size_t type_size = sizeof(T);
+    uint8_t *byte_index = reinterpret_cast<uint8_t*>(&m_buffer[0]);
+    if (m_endianess == R::ENDIANESS::BE)
+    {
+        for (int32_t i = 0, j = type_size - 1; j < static_cast<T>(m_buffer.size() * type_size); i += type_size, j += type_size)
+        {
+            int32_t index = j;
+            while (index >= i)
+            {
+                value_buffer.push_back(byte_index[index--]);
+            }
+        }
+    }
+    else if (m_endianess == R::ENDIANESS::LE)
+    {
+        for (uint32_t i = 0; i < m_buffer.size() * type_size; i++)
+        {
+            value_buffer.push_back(byte_index[i]);
+        }
+    }
+
+    // std::cout << "Sending -------   " << std::endl;
+    // for (uint32_t i = 0; i < value_buffer.size())
+
+    memcpy(m_tcp_client->get_send_buffer(), &value_buffer[0], value_buffer.size());
+    m_tcp_client->send(value_buffer.size());
+
     m_buffer.clear();
 }
 

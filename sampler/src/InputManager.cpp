@@ -15,6 +15,17 @@ void R::InputManager::getInput()
     {
         m_bsize = std::stoi(value);
     }
+    if ((value = getSpecificArg("-dip")) != 0)
+    {
+        m_ipaddress = value;
+    }
+    if ((value = getSpecificArg("-dp")) != 0)
+    {
+        m_dport = std::stoi(value);
+    }
+    
+    std::cout << "dip address: " << m_ipaddress << std::endl;
+    std::cout << "dp port: " << m_dport << std::endl;
     std::cout << "port: " << m_port << std::endl;
     std::cout << "reservoir bfer sz: " << m_bsize << std::endl;
 }

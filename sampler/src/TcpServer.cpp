@@ -3,6 +3,7 @@
 #include <cstring>
 #include <exception>
 #include <memory>
+#include "TcpClient.hpp"
 #include "Debug.hpp"
 #include "TcpServer.hpp"
 
@@ -65,6 +66,12 @@ R::TcpServer::~TcpServer()
     close(m_socketfd);
 }
 
+void R::TcpServer::set_destination_coordinates(const std::string &ip_address, uint16_t port)
+{
+    m_destination_ipaddress = ip_address;
+    m_dport = port;
+}
+
 void R::TcpServer::init_listen(int backlog)
 {
     if (listen(m_socketfd, backlog) == -1)
@@ -88,7 +95,19 @@ void R::TcpServer::init_listen(int backlog)
         save_peer_address(connectionid, peer_address_str, remote_port);
         std::cout << "Accepted connection: " << "\t address: " << peer_address_str << "\t port: " << remote_port << "\t fdescriptor: " << newfd << std::endl;
         
-        std::unique_ptr<TcpConnection> tcpConnection(new TcpConnection(*this, newfd, connectionid));
+
+        std::unique_ptr<TcpClient> tcp_client;
+        if (!m_destination_ipaddress.empty())
+        {
+            try {
+                tcp_client.reset(new TcpClient(m_destination_ipaddress, m_dport));
+            } catch (std::exception &e)
+            {
+
+            }
+        }
+
+        std::unique_ptr<TcpConnection> tcpConnection(new TcpConnection(*this, newfd, connectionid, std::move(tcp_client)));
         // m_tcpConnections.push_back(std::move(tcpConnection));
         m_tcpConnections[connectionid] = std::move(tcpConnection);
         m_tcpConnections[connectionid]->start_reading_thread();

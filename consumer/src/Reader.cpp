@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unistd.h>
+#include "Debug.hpp"
 #include "Reader.hpp"
 
 
@@ -34,6 +35,7 @@ void R::Reader::read_output_stream()
 
         if (m_buffer_pending && globalSumOfRead > 2)
         {
+            std::cout << "get_com_attributes" << std::endl;
             get_com_attributes();
         }
 
@@ -95,6 +97,9 @@ void R::Reader::get_com_attributes()
     m_endianess = static_cast<bool>(end);
     m_type_size = (type == TYPE::INT64) ? static_cast<size_t>(8) : static_cast<size_t>(4);
     m_dimension = dimension;
+    debug_print("m_endianess: " << static_cast<uint32_t>(m_endianess));
+    debug_print("m_type_size: " << static_cast<uint32_t>(m_type_size));
+    debug_print("m_dimension: " << static_cast<uint32_t>(m_dimension));
     if (type == TYPE::INT64)
     {
         m_os.reset(new OutputStream<int64_t>(m_endianess, m_dimension));

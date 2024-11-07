@@ -12,6 +12,8 @@ namespace R
                 , m_argc{argc}
                 , m_port{8080}
                 , m_bsize{10}
+                , m_ipaddress{}
+                , m_dport{9999}
             {
                 getInput(); 
             }
@@ -20,6 +22,8 @@ namespace R
             int m_argc;
             uint16_t m_port;
             uint32_t m_bsize;
+            std::string m_ipaddress;
+            uint16_t m_dport;
 
         private:
             void getInput();

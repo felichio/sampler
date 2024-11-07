@@ -1,19 +1,29 @@
 #include <iostream>
 #include <unistd.h>
+#include <cstring>
 #include "Debug.hpp"
 #include "TcpConnection.hpp"
 
 
 
-R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd, uint32_t connection_id)
+R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd, uint32_t connection_id, std::unique_ptr<TcpClient> tcp_client)
     : m_tcpServer{server}
     , m_socketfd{socketfd}
     , m_locked{false}
     , m_buffer_pending{true}
     , m_file{}
     , m_connectionid{connection_id}
+    , m_tcp_client{std::move(tcp_client)}
 {
     std::cout << "TcpConnection created with fd: " << m_socketfd << " connectionid: " << m_connectionid << std::endl;
+    if (m_tcp_client)
+    {
+        std::cout << "TcpClient ON"<< std::endl;
+    }
+    else
+    {
+        std::cout << "TcpClient OFF"<< std::endl;
+    }
     std::string filename = std::to_string(m_connectionid);
     filename += ".txt";
     m_file.open(filename, std::ios::out);
@@ -85,7 +95,11 @@ void R::TcpConnection::fill_buffer()
     m_tcpServer.remove_peer_address(m_connectionid);
     std::cout << "finsihed reading" << std::endl;
     if (m_RbufferManager)
+    {
         m_RbufferManager->flush_buffer();
+        m_RbufferManager.reset(nullptr);
+    }
+        
 }
 
 void R::TcpConnection::flush_buffer(uint8_t *beg, uint8_t *end)
@@ -103,18 +117,19 @@ void R::TcpConnection::choose_buffer()
     uint8_t end = m_buffer[0u];
     uint8_t type = m_buffer[1u];
     uint8_t dimension = m_buffer[2u];
+    memcpy(m_tcp_client->get_send_buffer(), &m_buffer[0], 3);
     if (end == 0x00 || end == 0x01)
     {
         if (type == TYPE::INT64)
         {
             std::cout << "Constructing rbuffer type: int64_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
-            m_RbufferManager.reset(new RbufferManager<int64_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file));
+            m_RbufferManager.reset(new RbufferManager<int64_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file, std::move(m_tcp_client)));
             m_buffer_pending = false;
         }
         else if (type == TYPE::INT32)
         {
             std::cout << "Constructing rbuffer type: int32_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
-            m_RbufferManager.reset(new RbufferManager<int32_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file));
+            m_RbufferManager.reset(new RbufferManager<int32_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file, std::move(m_tcp_client)));
             m_buffer_pending = false;
         }
         else

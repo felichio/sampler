@@ -4,31 +4,24 @@
 
 #include <thread>
 #include <fstream>
+#include "TcpClient.hpp"
 #include "TcpServer.hpp"
 #include "RbufferManager.hpp"
+#include "Enum.hpp"
+
 
 extern uint32_t RBUFFER_SIZE;
 namespace R
 {
     static const uint32_t buffer_size = 8192;
 
-    enum ENDIANESS: uint8_t
-    {
-        LE = 0x00,
-        BE = 0x01
-    };
-
-    enum TYPE: uint8_t
-    {
-        INT64 = 0x00,
-        INT32 = 0x01
-    };
+    
 
     class TcpServer; // forward declaration
     class TcpConnection
     {
         public:
-            TcpConnection(TcpServer &server, int socketfd, uint32_t connection_id); 
+            TcpConnection(TcpServer &server, int socketfd, uint32_t connection_id, std::unique_ptr<TcpClient> tcp_client); 
             ~TcpConnection();
             void start_reading_thread();
         private:
@@ -43,6 +36,7 @@ namespace R
             bool m_buffer_pending;
             std::ofstream m_file;
             uint32_t m_connectionid;
+            std::unique_ptr<TcpClient> m_tcp_client;
     };
 }
 

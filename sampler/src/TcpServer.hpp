@@ -20,12 +20,12 @@ namespace R
     class TcpServer
     {
         public:
-           TcpServer(uint16_t port_n);
-           ~TcpServer();
-           void init_listen(int backlog);
-           void save_peer_address(uint32_t id, std::string &ip_address, uint16_t port);
-           void remove_peer_address(uint32_t id);
-
+            TcpServer(uint16_t port_n);
+            ~TcpServer();
+            void init_listen(int backlog);
+            void save_peer_address(uint32_t id, std::string &ip_address, uint16_t port);
+            void remove_peer_address(uint32_t id);
+            void set_destination_coordinates(const std::string &ip_address, uint16_t port);
 
         private:
             std::mutex m_mutex;
@@ -35,8 +35,11 @@ namespace R
             std::map<uint32_t, std::pair<std::string, uint16_t>> m_peerAddresses;
             std::map<uint32_t, std::unique_ptr<TcpConnection>> m_tcpConnections;
             static uint32_t connectionid;
+            std::string m_destination_ipaddress;
+            uint16_t m_dport;
 
             void cleanup();
+            
     };
 
 }
