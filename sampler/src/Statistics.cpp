@@ -216,11 +216,11 @@ void R::Statistics<T>::print_vector(std::ostream &os, std::vector<T> &values)
 
 
 template<typename T>
-bool R::Statistics<T>::check_condition()
+bool R::Statistics<T>::check_condition(double threshold)
 {
     std::ofstream &m_file = m_RbufferManager.get_file();
     // check for dimension 0
-    if (std::abs((m_coeffv_stream[0] - m_coeffv_buffer[0]) / m_coeffv_stream[0]) > 0.1)
+    if (std::abs((m_coeffv_stream[0] - m_coeffv_buffer[0]) / m_coeffv_stream[0]) > threshold)
     {
         std::cout << "CV condition: " << std::abs((m_coeffv_stream[0] - m_coeffv_buffer[0]) / m_coeffv_stream[0]) << std::endl;
         m_file << "CV condition: " << std::abs((m_coeffv_stream[0] - m_coeffv_buffer[0]) / m_coeffv_stream[0]) << std::endl;

@@ -14,6 +14,7 @@ namespace R
                 , m_bsize{10}
                 , m_ipaddress{}
                 , m_dport{9999}
+                , m_z{}
             {
                 getInput(); 
             }
@@ -24,6 +25,7 @@ namespace R
             uint32_t m_bsize;
             std::string m_ipaddress;
             uint16_t m_dport;
+            double m_z;
 
         private:
             void getInput();

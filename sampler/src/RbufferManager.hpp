@@ -36,7 +36,7 @@ namespace R
     class RbufferManager : public RbufferManagerBase
     {
         public:
-            RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file, std::unique_ptr<TcpClient> tcp_client);
+            RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file, std::unique_ptr<TcpClient> tcp_client, double threshold);
             
             virtual void push_back_concrete_value(uint8_t *begin, uint8_t *end);
             void push_back_to_stream();
@@ -60,6 +60,8 @@ namespace R
             uint64_t m_local_stream_index;
             uint64_t m_stream_index;
             std::unique_ptr<TcpClient> m_tcp_client;
+
+            double m_threshold;
             
     };
 

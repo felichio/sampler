@@ -53,13 +53,14 @@ void R::RbufferManagerBase::push_back_to_stream(const uint8_t value)
 
 
 template<typename T>
-R::RbufferManager<T>::RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file, std::unique_ptr<TcpClient> tcp_client)
+R::RbufferManager<T>::RbufferManager(bool end, uint8_t dimension, size_t RBUFFER_SIZE, std::ofstream &file, std::unique_ptr<TcpClient> tcp_client, double threshold)
     : RbufferManagerBase(end, dimension, sizeof (T), RBUFFER_SIZE)
     , m_Statistics{*this, dimension}
     , m_file{file}
     , m_local_stream_index{0}
     , m_stream_index{0}
     , m_tcp_client{std::move(tcp_client)}
+    , m_threshold{threshold}
 {
     // reserve for at least reservoir buffer size
     m_stream.reserve(RBUFFER_SIZE * dimension);
@@ -159,7 +160,7 @@ void R::RbufferManager<T>::push_back_to_stream()
         m_file << "skipping n: " << m_stream_index << std::endl;
     }
 
-    if (m_Statistics.check_condition())
+    if (m_Statistics.check_condition(m_threshold))
     {
         flush_buffer();
         m_Statistics.clear_state();

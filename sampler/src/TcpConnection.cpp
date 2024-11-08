@@ -6,7 +6,7 @@
 
 
 
-R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd, uint32_t connection_id, std::unique_ptr<TcpClient> tcp_client)
+R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd, uint32_t connection_id, std::unique_ptr<TcpClient> tcp_client, InputManager &input_manager)
     : m_tcpServer{server}
     , m_socketfd{socketfd}
     , m_locked{false}
@@ -14,6 +14,7 @@ R::TcpConnection::TcpConnection(R::TcpServer &server, int socketfd, uint32_t con
     , m_file{}
     , m_connectionid{connection_id}
     , m_tcp_client{std::move(tcp_client)}
+    , m_Input{input_manager}
 {
     std::cout << "TcpConnection created with fd: " << m_socketfd << " connectionid: " << m_connectionid << std::endl;
     if (m_tcp_client)
@@ -123,13 +124,13 @@ void R::TcpConnection::choose_buffer()
         if (type == TYPE::INT64)
         {
             std::cout << "Constructing rbuffer type: int64_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
-            m_RbufferManager.reset(new RbufferManager<int64_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file, std::move(m_tcp_client)));
+            m_RbufferManager.reset(new RbufferManager<int64_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file, std::move(m_tcp_client), m_Input.m_z));
             m_buffer_pending = false;
         }
         else if (type == TYPE::INT32)
         {
             std::cout << "Constructing rbuffer type: int32_t endianess: " << static_cast<int>(end) << " dimension: " << static_cast<int>(dimension) << " rbuffer sz: " << RBUFFER_SIZE << std::endl;
-            m_RbufferManager.reset(new RbufferManager<int32_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file, std::move(m_tcp_client)));
+            m_RbufferManager.reset(new RbufferManager<int32_t>(static_cast<bool>(end), dimension, RBUFFER_SIZE, m_file, std::move(m_tcp_client), m_Input.m_z));
             m_buffer_pending = false;
         }
         else

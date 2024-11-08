@@ -23,6 +23,10 @@ void R::InputManager::getInput()
     {
         m_dport = std::stoi(value);
     }
+    if ((value = getSpecificArg("-z")) != 0)
+    {
+        m_z = std::stod(value);
+    }
     
     std::cout << "dip address: " << m_ipaddress << std::endl;
     std::cout << "dp port: " << m_dport << std::endl;

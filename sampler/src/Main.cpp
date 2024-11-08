@@ -8,8 +8,7 @@ int main(int argc, char *argv[])
 {
     R::InputManager imanager(argv, argc);
     RBUFFER_SIZE = imanager.m_bsize;
-    R::TcpServer server(imanager.m_port);
-    server.set_destination_coordinates(imanager.m_ipaddress, imanager.m_dport);
+    R::TcpServer server(imanager);
     server.init_listen(10);
     return 0;
 }

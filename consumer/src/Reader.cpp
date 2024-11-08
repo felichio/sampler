@@ -35,7 +35,6 @@ void R::Reader::read_output_stream()
 
         if (m_buffer_pending && globalSumOfRead > 2)
         {
-            std::cout << "get_com_attributes" << std::endl;
             get_com_attributes();
         }
 

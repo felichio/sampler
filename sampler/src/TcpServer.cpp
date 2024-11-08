@@ -9,7 +9,11 @@
 
 uint32_t R::TcpServer::connectionid = 0;
 
-R::TcpServer::TcpServer(uint16_t port_n): m_portnumber{port_n}
+R::TcpServer::TcpServer(InputManager &input_manager): 
+              m_Input{input_manager}
+            , m_portnumber{m_Input.m_port}
+            , m_destination_ipaddress{m_Input.m_ipaddress}
+            , m_dport{m_Input.m_dport}
 {
     // zero out the structure
     memset(&m_hints, 0, sizeof m_hints);
@@ -66,11 +70,7 @@ R::TcpServer::~TcpServer()
     close(m_socketfd);
 }
 
-void R::TcpServer::set_destination_coordinates(const std::string &ip_address, uint16_t port)
-{
-    m_destination_ipaddress = ip_address;
-    m_dport = port;
-}
+
 
 void R::TcpServer::init_listen(int backlog)
 {
@@ -107,7 +107,7 @@ void R::TcpServer::init_listen(int backlog)
             }
         }
 
-        std::unique_ptr<TcpConnection> tcpConnection(new TcpConnection(*this, newfd, connectionid, std::move(tcp_client)));
+        std::unique_ptr<TcpConnection> tcpConnection(new TcpConnection(*this, newfd, connectionid, std::move(tcp_client), m_Input));
         // m_tcpConnections.push_back(std::move(tcpConnection));
         m_tcpConnections[connectionid] = std::move(tcpConnection);
         m_tcpConnections[connectionid]->start_reading_thread();

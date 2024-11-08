@@ -16,7 +16,7 @@ namespace R
             
             void react_stream();
             void react_buffer();
-            bool check_condition();
+            bool check_condition(double threshold);
             void clear_state();
 
             static int64_t AlgorithmR(uint64_t t, size_t buffer_size);

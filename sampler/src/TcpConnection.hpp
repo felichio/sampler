@@ -7,6 +7,7 @@
 #include "TcpClient.hpp"
 #include "TcpServer.hpp"
 #include "RbufferManager.hpp"
+#include "InputManager.hpp"
 #include "Enum.hpp"
 
 
@@ -21,7 +22,7 @@ namespace R
     class TcpConnection
     {
         public:
-            TcpConnection(TcpServer &server, int socketfd, uint32_t connection_id, std::unique_ptr<TcpClient> tcp_client); 
+            TcpConnection(TcpServer &server, int socketfd, uint32_t connection_id, std::unique_ptr<TcpClient> tcp_client, InputManager &input_manager); 
             ~TcpConnection();
             void start_reading_thread();
         private:
@@ -37,6 +38,7 @@ namespace R
             std::ofstream m_file;
             uint32_t m_connectionid;
             std::unique_ptr<TcpClient> m_tcp_client;
+            InputManager &m_Input;
     };
 }
 
