@@ -6,23 +6,42 @@ Build running
 make
 ```
 
+In case of Debug build
+
+```
+make -DEBUG=1
+```
+
 Build artifacts will be located on root directory and inside build folders respectively
 
 Firstly run the consumer
 ```
-./consume -p 9090 -r 20
+./consume -p 9090
+```
+
+where
+```
+-p <port_number> | denotes the listening port number of the tcp server
+```
+
+Aftewards inititiate the middleware (sampler)
+```
+./sample -p 8080 -r 20 -z 0.1 -dip x.x.x.x -dp 9090
 ```
 
 where
 ```
 -p <port_number> | denotes the listening port number of the tcp server
 -r <size>        | denotes the reservoir buffer size used
+-z <threshold>   | denotes the upper bound based on which Epoch are segmented
+-dip <ipv4>      | denotes the destination ip address of the final consumer
+-dp <port_number>| denotes the destination port number of the listening service
 ```
 
 
-In order to stream values to consumer run the producer
+In order to stream values to sampler run the producer
 ```
-./produce -ip 127.0.0.1 -p 9090 -e LE -f input.csv
+./produce -ip 127.0.0.1 -p 8080 -e LE -f input.csv
 ```
 where
 ```
@@ -57,13 +76,14 @@ or
 cut -d, -f1-5 < some.csv > 5dimensional.csv
 
 ```
-You can then feed the exported first_dimension.csv (or 4dimensional.csv, 5dimensional.csv etc) to a consumer instance via the producer
+You can then feed the exported first_dimension.csv (or 4dimensional.csv, 5dimensional.csv etc) to a sampler instance via the producer
 
 ```
-./produce -ip 127.0.0.1 -p 9090 -e LE -f first_dimension.csv
+./produce -ip 127.0.0.1 -p 8080 -e LE -f first_dimension.csv
 ```
 
-The consumer will generate an output file  (name <n>.txt) describing the sampling process.
+The sampler will generate an output file  (name <n>.txt, n denotes a static counter based on the number of streams the consumer served.) describing the sampling process. The digested stream is transformed and buffer outputs are
+directed to the consumer instance.
 
-n denotes a static counter based on the number of streams the consumer served.
+
 
